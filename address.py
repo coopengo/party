@@ -6,7 +6,6 @@ from sql.conditionals import Case
 
 from trytond.model import ModelView, ModelSQL, fields
 from trytond.pyson import Eval, If
-from trytond.transaction import Transaction
 from trytond import backend
 from trytond.pool import Pool
 
@@ -53,8 +52,7 @@ class Address(ModelSQL, ModelView):
     @classmethod
     def __register__(cls, module_name):
         TableHandler = backend.get('TableHandler')
-        cursor = Transaction().cursor
-        table = TableHandler(cursor, cls, module_name)
+        table = TableHandler(cls, module_name)
 
         super(Address, cls).__register__(module_name)
 
@@ -127,15 +125,14 @@ class Address(ModelSQL, ModelView):
                 if full_address[-1:] != '\n':
                     full_address += ' '
                 full_address += self.city
-        if self.country or self.subdivision:
+        if self.subdivision:
             if full_address:
                 full_address += '\n'
-            if self.subdivision:
-                full_address += self.subdivision.name
-            if self.country:
-                if full_address[-1:] != '\n':
-                    full_address += ' '
-                full_address += self.country.name
+            full_address += self.subdivision.name
+        if self.country:
+            if full_address:
+                full_address += '\n'
+            full_address += self.country.name.upper()
         return full_address
 
     def get_rec_name(self, name):

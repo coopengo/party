@@ -28,8 +28,7 @@ class Party(ModelSQL, ModelView):
     "Party"
     __name__ = 'party.party'
 
-    name = fields.Char('Name', required=True, select=True,
-        states=STATES, depends=DEPENDS)
+    name = fields.Char('Name', select=True, states=STATES, depends=DEPENDS)
     code = fields.Char('Code', required=True, select=True,
         states={
             'readonly': Eval('code_readonly', True),
@@ -72,12 +71,12 @@ class Party(ModelSQL, ModelView):
         pool = Pool()
         Property = pool.get('ir.property')
         TableHandler = backend.get('TableHandler')
-        cursor = Transaction().cursor
+        cursor = Transaction().connection.cursor()
         table = cls.__table__()
 
         super(Party, cls).__register__(module_name)
 
-        table_h = TableHandler(cursor, cls, module_name)
+        table_h = TableHandler(cls, module_name)
         if table_h.column_exist('lang'):
             cursor.execute(*table.select(table.id, table.lang,
                     order_by=table.lang))
@@ -89,6 +88,9 @@ class Party(ModelSQL, ModelView):
                     value = None
                 Property.set('lang', cls.__name__, ids, value)
             table_h.drop_column('lang')
+
+        # Migration from 3.8
+        table_h.not_null_action('name', 'remove')
 
     @staticmethod
     def order_code(tables):
@@ -112,13 +114,6 @@ class Party(ModelSQL, ModelView):
             if x not in ('id', 'create_uid', 'create_date',
                 'write_uid', 'write_date'))
         return [Address.default_get(fields_names)]
-
-    @staticmethod
-    def default_lang():
-        Configuration = Pool().get('party.configuration')
-        config = Configuration(1)
-        if config.party_lang:
-            return config.party_lang.id
 
     @staticmethod
     def default_code_readonly():
@@ -181,6 +176,11 @@ class Party(ModelSQL, ModelView):
         for record, rec_name, icon in super(Party, cls).search_global(text):
             icon = icon or 'tryton-party'
             yield record, rec_name, icon
+
+    def get_rec_name(self, name):
+        if not self.name:
+            return '[' + self.code + ']'
+        return self.name
 
     @classmethod
     def search_rec_name(cls, name, clause):
@@ -246,12 +246,12 @@ class PartyIdentifier(ModelSQL, ModelView):
         pool = Pool()
         Party = pool.get('party.party')
         TableHandler = backend.get('TableHandler')
-        cursor = Transaction().cursor
+        cursor = Transaction().connection.cursor()
         party = Party.__table__()
 
         super(PartyIdentifier, cls).__register__(module_name)
 
-        party_h = TableHandler(cursor, Party, module_name)
+        party_h = TableHandler(Party, module_name)
         if (party_h.column_exist('vat_number')
                 and party_h.column_exist('vat_country')):
             identifiers = []
@@ -288,18 +288,20 @@ class PartyIdentifier(ModelSQL, ModelView):
                 pass
         return self.code
 
-    @classmethod
-    def validate(cls, identifiers):
-        super(PartyIdentifier, cls).validate(identifiers)
-        for identifier in identifiers:
-            identifier.check_code()
+    def pre_validate(self):
+        super(PartyIdentifier, self).pre_validate()
+        self.check_code()
 
     def check_code(self):
         if self.type == 'eu_vat':
             if not vat.is_valid(self.code):
+                if self.party.id > 0:
+                    party = self.party.rec_name
+                else:
+                    party = ''
                 self.raise_user_error('invalid_vat', {
                         'code': self.code,
-                        'party': self.party.rec_name,
+                        'party': party,
                         })
 
 
