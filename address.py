@@ -1,15 +1,21 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
 'Address'
+from string import Template
+
 from sql import Null
 from sql.conditionals import Case
+from sql.operators import Concat
 
-from trytond.model import ModelView, ModelSQL, fields
+from trytond.model import ModelView, ModelSQL, MatchMixin, fields, \
+    sequence_ordered
 from trytond.pyson import Eval, If
 from trytond import backend
 from trytond.pool import Pool
+from trytond.transaction import Transaction
+from trytond.cache import Cache
 
-__all__ = ['Address']
+__all__ = ['Address', 'AddressFormat']
 
 STATES = {
     'readonly': ~Eval('active'),
@@ -17,7 +23,7 @@ STATES = {
 DEPENDS = ['active']
 
 
-class Address(ModelSQL, ModelView):
+class Address(sequence_ordered(), ModelSQL, ModelView):
     "Address"
     __name__ = 'party.address'
     party = fields.Many2One('party.party', 'Party', required=True,
@@ -25,18 +31,19 @@ class Address(ModelSQL, ModelView):
             'readonly': If(~Eval('active'), True, Eval('id', 0) > 0),
             },
         depends=['active', 'id'])
-    name = fields.Char('Name', states=STATES, depends=DEPENDS)
-    street = fields.Char('Street', states=STATES, depends=DEPENDS)
-    streetbis = fields.Char('Street (bis)', states=STATES, depends=DEPENDS)
+    name = fields.Char("Building Name", states=STATES, depends=DEPENDS)
+    street = fields.Text("Street", states=STATES, depends=DEPENDS)
     zip = fields.Char('Zip', states=STATES, depends=DEPENDS)
     city = fields.Char('City', states=STATES, depends=DEPENDS)
     country = fields.Many2One('country.country', 'Country',
         states=STATES, depends=DEPENDS)
     subdivision = fields.Many2One("country.subdivision",
-            'Subdivision', domain=[('country', '=', Eval('country'))],
-            states=STATES, depends=['active', 'country'])
+        'Subdivision', domain=[
+            ('country', '=', Eval('country', -1)),
+            ('parent', '=', None),
+            ],
+        states=STATES, depends=['active', 'country'])
     active = fields.Boolean('Active')
-    sequence = fields.Integer("Sequence")
     full_address = fields.Function(fields.Text('Full Address'),
             'get_full_address')
 
@@ -44,7 +51,6 @@ class Address(ModelSQL, ModelView):
     def __setup__(cls):
         super(Address, cls).__setup__()
         cls._order.insert(0, ('party', 'ASC'))
-        cls._order.insert(1, ('sequence', 'ASC'))
         cls._error_messages.update({
                 'write_party': 'You can not modify the party of address "%s".',
                 })
@@ -52,17 +58,22 @@ class Address(ModelSQL, ModelView):
     @classmethod
     def __register__(cls, module_name):
         TableHandler = backend.get('TableHandler')
+        cursor = Transaction().connection.cursor()
         table = TableHandler(cls, module_name)
+        sql_table = cls.__table__()
 
         super(Address, cls).__register__(module_name)
 
         # Migration from 2.4: drop required on sequence
         table.not_null_action('sequence', action='remove')
 
-    @staticmethod
-    def order_sequence(tables):
-        table, _ = tables[None]
-        return [Case((table.sequence == Null, 0), else_=1), table.sequence]
+        # Migration from 4.0: remove streetbis
+        if table.column_exist('streetbis'):
+            value = Concat(sql_table.street, Concat('\n', sql_table.streetbis))
+            cursor.execute(*sql_table.update(
+                    [sql_table.street],
+                    [value]))
+            table.drop_column('streetbis')
 
     @staticmethod
     def default_active():
@@ -76,7 +87,8 @@ class Address(ModelSQL, ModelView):
             domain.append(('country', '=', self.country.id))
         if self.subdivision:
             domain.append(['OR',
-                    ('subdivision', '=', self.subdivision.id),
+                    ('subdivision', 'child_of',
+                        [self.subdivision.id], 'parent'),
                     ('subdivision', '=', None),
                     ])
         return domain
@@ -105,39 +117,43 @@ class Address(ModelSQL, ModelView):
         return self._autocomplete_search(domain, 'city')
 
     def get_full_address(self, name):
-        full_address = ''
-        if self.name:
-            full_address = self.name
-        if self.street:
-            if full_address:
-                full_address += '\n'
-            full_address += self.street
-        if self.streetbis:
-            if full_address:
-                full_address += '\n'
-            full_address += self.streetbis
-        if self.zip or self.city:
-            if full_address:
-                full_address += '\n'
-            if self.zip:
-                full_address += self.zip
-            if self.city:
-                if full_address[-1:] != '\n':
-                    full_address += ' '
-                full_address += self.city
-        if self.subdivision:
-            if full_address:
-                full_address += '\n'
-            full_address += self.subdivision.name
-        if self.country:
-            if full_address:
-                full_address += '\n'
-            full_address += self.country.name.upper()
-        return full_address
+        pool = Pool()
+        AddressFormat = pool.get('party.address.format')
+        full_address = Template(AddressFormat.get_format(self)).substitute(
+            **self._get_address_substitutions())
+        return '\n'.join(
+            filter(None, (x.strip() for x in full_address.splitlines())))
+
+    def _get_address_substitutions(self):
+        context = Transaction().context
+        substitutions = {
+            'party_name': '',
+            'name': self.name or '',
+            'street': self.street or '',
+            'zip': self.zip or '',
+            'city': self.city or '',
+            'subdivision': self.subdivision.name if self.subdivision else '',
+            'subdivision_code': (self.subdivision.code.split('-', 1)[1]
+                if self.subdivision else ''),
+            'country': self.country.name if self.country else '',
+            'country_code': self.country.code if self.country else '',
+            }
+
+        # Map invalid substitutions district* to subdivision* on 4.2.
+        substitutions['district'] = substitutions['subdivision']
+        substitutions['district_code'] = substitutions['subdivision_code']
+
+        if context.get('address_from_country') == self.country:
+            substitutions['country'] = ''
+        if context.get('address_with_party', False):
+            substitutions['party_name'] = self.party.full_name
+        for key, value in substitutions.items():
+            substitutions[key.upper()] = value.upper()
+        return substitutions
 
     def get_rec_name(self, name):
-        return ", ".join(x for x in [self.name,
-                self.party.rec_name, self.zip, self.city] if x)
+        return ', '.join(
+            filter(None, [self.party.rec_name, self.zip, self.city]))
 
     @classmethod
     def search_rec_name(cls, name, clause):
@@ -148,7 +164,6 @@ class Address(ModelSQL, ModelView):
         return [bool_op,
             ('zip',) + tuple(clause[1:]),
             ('city',) + tuple(clause[1:]),
-            ('name',) + tuple(clause[1:]),
             ('party',) + tuple(clause[1:]),
             ]
 
@@ -168,3 +183,100 @@ class Address(ModelSQL, ModelView):
         if (self.subdivision
                 and self.subdivision.country != self.country):
             self.subdivision = None
+
+
+class AddressFormat(MatchMixin, ModelSQL, ModelView):
+    "Address Format"
+    __name__ = 'party.address.format'
+    country = fields.Many2One('country.country', "Country")
+    language = fields.Many2One('ir.lang', "Language")
+    active = fields.Boolean("Active")
+    format_ = fields.Text("Format", required=True,
+        help="Available variables (also in upper case):\n"
+        "- ${party_name}\n"
+        "- ${name}\n"
+        "- ${street}\n"
+        "- ${zip}\n"
+        "- ${city}\n"
+        "- ${subdivision}\n"
+        "- ${subdivision_code}\n"
+        "- ${country}\n"
+        "- ${country_code}")
+
+    _get_format_cache = Cache('party.address.format.get_format')
+
+    @classmethod
+    def __setup__(cls):
+        super(AddressFormat, cls).__setup__()
+        cls._order.insert(0, ('country', 'ASC'))
+        cls._order.insert(1, ('language', 'ASC'))
+
+    @classmethod
+    def default_active(cls):
+        return True
+
+    @classmethod
+    def default_format_(cls):
+        return """${party_name}
+${name}
+${street}
+${zip} ${city}
+${subdivision}
+${COUNTRY}"""
+
+    @staticmethod
+    def order_language(tables):
+        table, _ = tables[None]
+        return [Case((table.language == Null, 1), else_=0), table.language]
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        records = super(AddressFormat, cls).create(*args, **kwargs)
+        cls._get_format_cache.clear()
+        return records
+
+    @classmethod
+    def write(cls, *args, **kwargs):
+        super(AddressFormat, cls).write(*args, **kwargs)
+        cls._get_format_cache.clear()
+
+    @classmethod
+    def delete(cls, *args, **kwargs):
+        super(AddressFormat, cls).delete(*args, **kwargs)
+        cls._get_format_cache.clear()
+
+    @classmethod
+    def get_format(cls, address, pattern=None):
+        pool = Pool()
+        Language = pool.get('ir.lang')
+
+        if pattern is None:
+            pattern = {}
+        else:
+            pattern = pattern.copy()
+        pattern.setdefault(
+            'country', address.country.id if address.country else None)
+
+        languages = Language.search([
+                ('code', '=', Transaction().language),
+                ], limit=1)
+        if languages:
+            language, = languages
+        else:
+            language = None
+        pattern.setdefault('language', language.id if language else None)
+
+        key = tuple(sorted(pattern.iteritems()))
+        format_ = cls._get_format_cache.get(key)
+        if format_ is not None:
+            return format_
+
+        for record in cls.search([]):
+            if record.match(pattern):
+                format_ = record.format_
+                break
+        else:
+            format_ = cls.default_format_()
+
+        cls._get_format_cache.set(key, format_)
+        return format_

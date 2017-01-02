@@ -8,6 +8,7 @@ Prerequisites
  * trytond (http://www.tryton.org/)
  * trytond_country (http://www.tryton.org/)
  * python-stdnum (http://arthurdejong.org/python-stdnum/)
+ * Optional: phonenumbers (http://pypi.python.org/pypi/phonenumbers)
 
 Installation
 ------------
@@ -24,7 +25,7 @@ site-packages directory on your system.
 For advanced options, please refer to the easy_install and/or the distutils
 documentation:
 
-  http://peak.telecommunity.com/DevCenter/EasyInstall
+  http://setuptools.readthedocs.io/en/latest/easy_install.html
   http://docs.python.org/inst/inst.html
 
 To use without installation, extract the archive into ``trytond/modules`` with

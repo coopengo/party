@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
 this repository contains the full copyright notices and license terms. -->
-<form string="Party" col="6">
+<form col="6">
     <label name="name"/>
     <field name="name" xexpand="1"/>
     <label name="code"/>
@@ -11,6 +11,8 @@ this repository contains the full copyright notices and license terms. -->
         <field name="active" xexpand="0" width="25"/>
         <!-- Add here some checkboxes ! -->
     </group>
+    <label name="replaced_by"/>
+    <field name="replaced_by"/>
     <notebook colspan="6">
         <page string="General" id="general">
             <field name="addresses" mode="form,tree" colspan="4"
@@ -25,7 +27,8 @@ this repository contains the full copyright notices and license terms. -->
                 view_ids="party.category_view_list"/>
         </page>
         <page name="identifiers">
-            <field name="identifiers" colspan="4" pre_validate="1"/>
+            <field name="identifiers" colspan="4" pre_validate="1"
+                view_ids="party.identifier_list_sequence"/>
         </page>
     </notebook>
 </form>

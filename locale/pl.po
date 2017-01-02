@@ -4,117 +4,169 @@ msgstr "Content-Type: text/plain; charset=utf-8\n"
 
 msgctxt "error:party.address:"
 msgid "You can not modify the party of address \"%s\"."
-msgstr "Usted no puede modificar la dirección del tercero \"%s\" "
+msgstr "Nie możesz modyfikować strony z adresem \"%s\"."
 
 msgctxt "error:party.category:"
 msgid "Invalid category name \"%s\": You can not use \" / \" in name field."
-msgstr ""
-"Inválida categoría de nombre \"%s\":  Usted no puede usar \"/\" en el nombre"
-" del campo."
+msgstr "Niewłaściwa nazwa kategorii \"%s\": Nie możesz użyć \" / \" w nazwie."
 
 msgctxt "error:party.category:"
 msgid "The name of a party category must be unique by parent."
-msgstr "¡El nombre de una categoría de tercero debe ser único por cada padre!"
+msgstr ""
+"Nazwa kategorii strony musi być unikatowa względem kategorii nadrzędnej."
 
 msgctxt "error:party.check_vies:"
 msgid "The VIES service is unavailable, try again later."
-msgstr "El servicio VIES no está disponible, inténtelo de nuevo más tarde"
+msgstr "Usługa VIES jest niedostępna. Spróbuj później."
+
+msgctxt "error:party.contact_mechanism:"
+msgid "The phone number \"%(phone)s\" of party \"%(party)s\" is not valid ."
+msgstr "Numer telefonu \"%(phone)s\" strony \"%(party)s\" jest niewłaściwy."
 
 msgctxt "error:party.contact_mechanism:"
 msgid "You can not modify the party of contact mechanism \"%s\"."
-msgstr "Usted no puede modificar los medios de contacto del tercero \"%s\" "
+msgstr "Nie możesz modyfikować strony, której kontakt to \"%s\"."
 
 msgctxt "error:party.identifier:"
 msgid "Invalid VAT number \"%(code)s\" on party \"%(party)s\"."
-msgstr "Inválido número NIT \"%(vat)s\" en tercero \"%(party)s\"."
+msgstr "Niewłaściwy numer VAT \"%(code)s\" strony \"%(party)s\"."
 
 msgctxt "error:party.party:"
 msgid "The code of the party must be unique."
-msgstr "El código del tercero debe ser único."
+msgstr "Kod strony musi być unikatowy."
+
+msgctxt "error:party.replace:"
+msgid ""
+"Parties have different Tax Identifier: %(source_code)s vs "
+"%(destination_code)s."
+msgstr ""
+"Strony mają różny identyfikator podatkowy: %(source_code)s różni się od "
+"%(destination_code)s."
+
+msgctxt "error:party.replace:"
+msgid "Parties have different names: %(source_name)s vs %(destination_name)s."
+msgstr ""
+"Strony mają różne nazwy: %(source_name)s różni się od %(destination_name)s."
 
 msgctxt "field:party.address,active:"
 msgid "Active"
-msgstr "Activo"
+msgstr "Aktywny"
 
 msgctxt "field:party.address,city:"
 msgid "City"
-msgstr "Ciudad"
+msgstr "Miejscowość"
 
 msgctxt "field:party.address,country:"
 msgid "Country"
-msgstr "País"
+msgstr "Kraj"
 
 msgctxt "field:party.address,create_date:"
 msgid "Create Date"
-msgstr "Fecha de Creación"
+msgstr "Data utworzenia"
 
 msgctxt "field:party.address,create_uid:"
 msgid "Create User"
-msgstr "Creado por Usuario"
+msgstr "Utworzył"
 
 msgctxt "field:party.address,full_address:"
 msgid "Full Address"
-msgstr "Dirección Completa"
+msgstr "Pełny adres"
 
 msgctxt "field:party.address,id:"
 msgid "ID"
 msgstr "ID"
 
 msgctxt "field:party.address,name:"
-msgid "Name"
-msgstr "Contacto"
+msgid "Building Name"
+msgstr "Nazwa lokalizacji"
 
 msgctxt "field:party.address,party:"
 msgid "Party"
-msgstr "Tercero"
+msgstr "Strona"
 
 msgctxt "field:party.address,rec_name:"
 msgid "Name"
-msgstr "Contacto"
+msgstr "Nazwa"
 
 msgctxt "field:party.address,sequence:"
 msgid "Sequence"
-msgstr "Secuencia"
+msgstr "Kolejność"
 
 msgctxt "field:party.address,street:"
 msgid "Street"
-msgstr "Dirección"
-
-msgctxt "field:party.address,streetbis:"
-msgid "Street (bis)"
-msgstr "Dirección (bis)"
+msgstr "Ulica"
 
 msgctxt "field:party.address,subdivision:"
 msgid "Subdivision"
-msgstr "Departamento"
+msgstr "Jednostka podrzędna"
 
 msgctxt "field:party.address,write_date:"
 msgid "Write Date"
-msgstr "Fecha de Modificación"
+msgstr "Data zapisu"
 
 msgctxt "field:party.address,write_uid:"
 msgid "Write User"
-msgstr "Modificado por Usuario"
+msgstr "Zapisał"
 
 msgctxt "field:party.address,zip:"
 msgid "Zip"
-msgstr "Código Postal"
+msgstr "Kod pocztowy"
+
+msgctxt "field:party.address.format,active:"
+msgid "Active"
+msgstr "Aktywny"
+
+msgctxt "field:party.address.format,country:"
+msgid "Country"
+msgstr "Kraj"
+
+msgctxt "field:party.address.format,create_date:"
+msgid "Create Date"
+msgstr "Data utworzenia"
+
+msgctxt "field:party.address.format,create_uid:"
+msgid "Create User"
+msgstr "Utworzył"
+
+msgctxt "field:party.address.format,format_:"
+msgid "Format"
+msgstr "Format"
+
+msgctxt "field:party.address.format,id:"
+msgid "ID"
+msgstr "ID"
+
+msgctxt "field:party.address.format,language:"
+msgid "Language"
+msgstr "Język"
+
+msgctxt "field:party.address.format,rec_name:"
+msgid "Name"
+msgstr "Nazwa"
+
+msgctxt "field:party.address.format,write_date:"
+msgid "Write Date"
+msgstr "Data zapisu"
+
+msgctxt "field:party.address.format,write_uid:"
+msgid "Write User"
+msgstr "Zapisał"
 
 msgctxt "field:party.category,active:"
 msgid "Active"
-msgstr "Activo"
+msgstr "Aktywny"
 
 msgctxt "field:party.category,childs:"
 msgid "Children"
-msgstr "Hijos"
+msgstr "Elementy podrzędne"
 
 msgctxt "field:party.category,create_date:"
 msgid "Create Date"
-msgstr "Fecha de Creación"
+msgstr "Data utworzenia"
 
 msgctxt "field:party.category,create_uid:"
 msgid "Create User"
-msgstr "Creado por Usuario"
+msgstr "Utworzył"
 
 msgctxt "field:party.category,id:"
 msgid "ID"
@@ -122,23 +174,23 @@ msgstr "ID"
 
 msgctxt "field:party.category,name:"
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nazwa"
 
 msgctxt "field:party.category,parent:"
 msgid "Parent"
-msgstr "Padre"
+msgstr "Element nadrzędny"
 
 msgctxt "field:party.category,rec_name:"
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nazwa"
 
 msgctxt "field:party.category,write_date:"
 msgid "Write Date"
-msgstr "Fecha de Modificación"
+msgstr "Data zapisu"
 
 msgctxt "field:party.category,write_uid:"
 msgid "Write User"
-msgstr "Modificado por Usuario"
+msgstr "Zapisał"
 
 msgctxt "field:party.check_vies.result,id:"
 msgid "ID"
@@ -146,19 +198,19 @@ msgstr "ID"
 
 msgctxt "field:party.check_vies.result,parties_failed:"
 msgid "Parties Failed"
-msgstr "Terceros Incorrectos"
+msgstr "Potwierdzenie numeru VAT stron nie powiodło się"
 
 msgctxt "field:party.check_vies.result,parties_succeed:"
 msgid "Parties Succeed"
-msgstr "Terceros Corrrectos"
+msgstr "Potwierdzenie numeru VAT stron powiodło się"
 
 msgctxt "field:party.configuration,create_date:"
 msgid "Create Date"
-msgstr "Fecha de Creación"
+msgstr "Data utworzenia"
 
 msgctxt "field:party.configuration,create_uid:"
 msgid "Create User"
-msgstr "Creado por Usuario"
+msgstr "Utworzył"
 
 msgctxt "field:party.configuration,id:"
 msgid "ID"
@@ -166,39 +218,39 @@ msgstr "ID"
 
 msgctxt "field:party.configuration,party_sequence:"
 msgid "Party Sequence"
-msgstr "Secuencia de Tercero"
+msgstr "Kolejność strony"
 
 msgctxt "field:party.configuration,rec_name:"
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nazwa"
 
 msgctxt "field:party.configuration,write_date:"
 msgid "Write Date"
-msgstr "Fecha de Modificación"
+msgstr "Data zapisu"
 
 msgctxt "field:party.configuration,write_uid:"
 msgid "Write User"
-msgstr "Modificado por Usuario"
+msgstr "Zapisał"
 
 msgctxt "field:party.contact_mechanism,active:"
 msgid "Active"
-msgstr "Activo"
+msgstr "Aktywny"
 
 msgctxt "field:party.contact_mechanism,comment:"
 msgid "Comment"
-msgstr "Comentario"
+msgstr "Komentarz"
 
 msgctxt "field:party.contact_mechanism,create_date:"
 msgid "Create Date"
-msgstr "Fecha de Creación"
+msgstr "Data utworzenia"
 
 msgctxt "field:party.contact_mechanism,create_uid:"
 msgid "Create User"
-msgstr "Creado por Usuario"
+msgstr "Utworzył"
 
 msgctxt "field:party.contact_mechanism,email:"
 msgid "E-Mail"
-msgstr "Correo electrónico"
+msgstr "E-mail"
 
 msgctxt "field:party.contact_mechanism,id:"
 msgid "ID"
@@ -206,19 +258,19 @@ msgstr "ID"
 
 msgctxt "field:party.contact_mechanism,other_value:"
 msgid "Value"
-msgstr "Valor"
+msgstr "Wartość"
 
 msgctxt "field:party.contact_mechanism,party:"
 msgid "Party"
-msgstr "Tercero"
+msgstr "Strona"
 
 msgctxt "field:party.contact_mechanism,rec_name:"
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nazwa"
 
 msgctxt "field:party.contact_mechanism,sequence:"
 msgid "Sequence"
-msgstr "Secuencia"
+msgstr "Kolejność"
 
 msgctxt "field:party.contact_mechanism,sip:"
 msgid "SIP"
@@ -230,7 +282,7 @@ msgstr "Skype"
 
 msgctxt "field:party.contact_mechanism,type:"
 msgid "Type"
-msgstr "Tipo"
+msgstr "Typ"
 
 msgctxt "field:party.contact_mechanism,url:"
 msgid "URL"
@@ -238,31 +290,35 @@ msgstr "URL"
 
 msgctxt "field:party.contact_mechanism,value:"
 msgid "Value"
-msgstr "Valor"
+msgstr "Wartość"
+
+msgctxt "field:party.contact_mechanism,value_compact:"
+msgid "Value Compact"
+msgstr "Wartość łączna"
 
 msgctxt "field:party.contact_mechanism,website:"
 msgid "Website"
-msgstr "Sitio Web"
+msgstr "Strona WWW"
 
 msgctxt "field:party.contact_mechanism,write_date:"
 msgid "Write Date"
-msgstr "Fecha de Modificación"
+msgstr "Data zapisu"
 
 msgctxt "field:party.contact_mechanism,write_uid:"
 msgid "Write User"
-msgstr "Modificado por Usuario"
+msgstr "Zapisał"
 
 msgctxt "field:party.identifier,code:"
 msgid "Code"
-msgstr "Código"
+msgstr "Kod"
 
 msgctxt "field:party.identifier,create_date:"
 msgid "Create Date"
-msgstr "Fecha de Creación"
+msgstr "Data utworzenia"
 
 msgctxt "field:party.identifier,create_uid:"
 msgid "Create User"
-msgstr "Creado por Usuario"
+msgstr "Utworzył"
 
 msgctxt "field:party.identifier,id:"
 msgid "ID"
@@ -270,67 +326,71 @@ msgstr "ID"
 
 msgctxt "field:party.identifier,party:"
 msgid "Party"
-msgstr "Tercero"
+msgstr "Strona"
 
 msgctxt "field:party.identifier,rec_name:"
 msgid "Name"
-msgstr "Contacto"
+msgstr "Nazwa"
+
+msgctxt "field:party.identifier,sequence:"
+msgid "Sequence"
+msgstr "Kolejność"
 
 msgctxt "field:party.identifier,type:"
 msgid "Type"
-msgstr "Tipo"
+msgstr "Typ"
 
 msgctxt "field:party.identifier,write_date:"
 msgid "Write Date"
-msgstr "Fecha de Modificación"
+msgstr "Data zapisu"
 
 msgctxt "field:party.identifier,write_uid:"
 msgid "Write User"
-msgstr "Modificado por Usuario"
+msgstr "Zapisał"
 
 msgctxt "field:party.party,active:"
 msgid "Active"
-msgstr "Activo"
+msgstr "Aktywny"
 
 msgctxt "field:party.party,addresses:"
 msgid "Addresses"
-msgstr "Direcciones"
+msgstr "Adresy"
 
 msgctxt "field:party.party,categories:"
 msgid "Categories"
-msgstr "Categorías"
+msgstr "Kategorie"
 
 msgctxt "field:party.party,code:"
 msgid "Code"
-msgstr "Código"
+msgstr "Kod"
 
 msgctxt "field:party.party,code_readonly:"
 msgid "Code Readonly"
-msgstr "Código de Sólo Lectura"
+msgstr "Kod do odczytu"
 
 msgctxt "field:party.party,contact_mechanisms:"
 msgid "Contact Mechanisms"
-msgstr "Medios de Contacto"
+msgstr "Sposoby kontaktu"
 
 msgctxt "field:party.party,create_date:"
 msgid "Create Date"
-msgstr "Fecha de Creación"
+msgstr "Data utworzenia"
 
 msgctxt "field:party.party,create_uid:"
 msgid "Create User"
-msgstr "Creado por Usuario"
+msgstr "Utworzył"
 
 msgctxt "field:party.party,email:"
 msgid "E-Mail"
-msgstr "Correo electrónico"
+msgstr "E-mail"
 
 msgctxt "field:party.party,fax:"
 msgid "Fax"
-msgstr "Fax"
+msgstr "Faks"
 
 msgctxt "field:party.party,full_name:"
 msgid "Full Name"
-msgstr "Nombre Completo"
+msgstr "Pełna nazwa"
 
 msgctxt "field:party.party,id:"
 msgid "ID"
@@ -338,55 +398,59 @@ msgstr "ID"
 
 msgctxt "field:party.party,identifiers:"
 msgid "Identifiers"
-msgstr "Identificador"
+msgstr "Identyfikatory"
 
 msgctxt "field:party.party,lang:"
 msgid "Language"
-msgstr "Idioma"
+msgstr "Język"
 
 msgctxt "field:party.party,mobile:"
 msgid "Mobile"
-msgstr "Móvil"
+msgstr "Komórka"
 
 msgctxt "field:party.party,name:"
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nazwa"
 
 msgctxt "field:party.party,phone:"
 msgid "Phone"
-msgstr "Teléfono"
+msgstr "Telefon"
 
 msgctxt "field:party.party,rec_name:"
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nazwa"
 
-msgctxt "field:party.party,vat_code:"
-msgid "VAT Code"
-msgstr "Núm. Id."
+msgctxt "field:party.party,replaced_by:"
+msgid "Replaced By"
+msgstr "Zastąpione przez"
+
+msgctxt "field:party.party,tax_identifier:"
+msgid "Tax Identifier"
+msgstr "Identyfikator podatkowy"
 
 msgctxt "field:party.party,website:"
 msgid "Website"
-msgstr "Sitio Web"
+msgstr "Strona WWW"
 
 msgctxt "field:party.party,write_date:"
 msgid "Write Date"
-msgstr "Fecha de Modificación"
+msgstr "Data zapisu"
 
 msgctxt "field:party.party,write_uid:"
 msgid "Write User"
-msgstr "Modificado por Usuario"
+msgstr "Zapisał"
 
 msgctxt "field:party.party-party.category,category:"
 msgid "Category"
-msgstr "Categoría"
+msgstr "Kategoria"
 
 msgctxt "field:party.party-party.category,create_date:"
 msgid "Create Date"
-msgstr "Fecha de Creación"
+msgstr "Data utworzenia"
 
 msgctxt "field:party.party-party.category,create_uid:"
 msgid "Create User"
-msgstr "Creado por Usuario"
+msgstr "Utworzył"
 
 msgctxt "field:party.party-party.category,id:"
 msgid "ID"
@@ -394,139 +458,195 @@ msgstr "ID"
 
 msgctxt "field:party.party-party.category,party:"
 msgid "Party"
-msgstr "Tercero"
+msgstr "Strona"
 
 msgctxt "field:party.party-party.category,rec_name:"
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nazwa"
 
 msgctxt "field:party.party-party.category,write_date:"
 msgid "Write Date"
-msgstr "Fecha de Modificación"
+msgstr "Data zapisu"
 
 msgctxt "field:party.party-party.category,write_uid:"
 msgid "Write User"
-msgstr "Modificado por Usuario"
+msgstr "Zapisał"
+
+msgctxt "field:party.replace.ask,destination:"
+msgid "Destination"
+msgstr "Cel"
+
+msgctxt "field:party.replace.ask,id:"
+msgid "ID"
+msgstr "ID"
+
+msgctxt "field:party.replace.ask,source:"
+msgid "Source"
+msgstr "Źródło"
+
+msgctxt "help:party.address.format,format_:"
+msgid ""
+"Available variables (also in upper case):\n"
+"- ${party_name}\n"
+"- ${name}\n"
+"- ${street}\n"
+"- ${zip}\n"
+"- ${city}\n"
+"- ${subdivision}\n"
+"- ${subdivision_code}\n"
+"- ${country}\n"
+"- ${country_code}"
+msgstr ""
+"Dostępne zmienne (pisane także dużymi literami):\n"
+"- ${party_name}\n"
+"- ${name}\n"
+"- ${street}\n"
+"- ${zip}\n"
+"- ${city}\n"
+"- ${subdivision}\n"
+"- ${subdivision_code}\n"
+"- ${country}\n"
+"- ${country_code}"
 
 msgctxt "model:ir.action,name:act_address_form"
 msgid "Addresses"
-msgstr "Direcciones"
+msgstr "Adresy"
+
+msgctxt "model:ir.action,name:act_address_format_form"
+msgid "Address Formats"
+msgstr "Formaty adresów"
 
 msgctxt "model:ir.action,name:act_category_list"
 msgid "Categories"
-msgstr "Categorías"
+msgstr "Kategorie"
 
 msgctxt "model:ir.action,name:act_category_tree"
 msgid "Categories"
-msgstr "Categorías"
+msgstr "Kategorie"
 
 msgctxt "model:ir.action,name:act_contact_mechanism_form"
 msgid "Contact Mechanisms"
-msgstr "Medios de Contacto"
+msgstr "Sposoby kontaktu"
 
 msgctxt "model:ir.action,name:act_party_by_category"
 msgid "Parties by Category"
-msgstr "Terceros por Categoría"
+msgstr "Strony wg kategorii"
 
 msgctxt "model:ir.action,name:act_party_configuration_form"
 msgid "Party Configuration"
-msgstr "Configuración de Terceros"
+msgstr "Konfiguracja ustawień strony"
 
 msgctxt "model:ir.action,name:act_party_form"
 msgid "Parties"
-msgstr "Terceros"
+msgstr "Strony"
 
 msgctxt "model:ir.action,name:report_label"
 msgid "Labels"
-msgstr "Etiquetas"
+msgstr "Etykiety"
 
 msgctxt "model:ir.action,name:wizard_check_vies"
 msgid "Check VIES"
-msgstr "Comprobar VIES"
+msgstr "Sprawdź VIES"
+
+msgctxt "model:ir.action,name:wizard_replace"
+msgid "Replace"
+msgstr "Zastąp"
 
 msgctxt "model:ir.sequence,name:sequence_party"
 msgid "Party"
-msgstr "Tercero"
+msgstr "Strona"
 
 msgctxt "model:ir.sequence.type,name:sequence_type_party"
 msgid "Party"
-msgstr "Tercero"
+msgstr "Strona"
 
 msgctxt "model:ir.ui.menu,name:menu_address_form"
 msgid "Addresses"
-msgstr "Direcciones"
+msgstr "Adresy"
+
+msgctxt "model:ir.ui.menu,name:menu_address_format_form"
+msgid "Address Formats"
+msgstr "Formaty adresów"
 
 msgctxt "model:ir.ui.menu,name:menu_category_list"
 msgid "Categories"
-msgstr "Categorías"
+msgstr "Kategorie"
 
 msgctxt "model:ir.ui.menu,name:menu_category_tree"
 msgid "Categories"
-msgstr "Categorías"
+msgstr "Kategorie"
 
 msgctxt "model:ir.ui.menu,name:menu_configuration"
 msgid "Configuration"
-msgstr "Configuración"
+msgstr "Konfiguracja"
 
 msgctxt "model:ir.ui.menu,name:menu_contact_mechanism_form"
 msgid "Contact Mechanisms"
-msgstr "Medios de Contacto"
+msgstr "Sposoby kontaktu"
 
 msgctxt "model:ir.ui.menu,name:menu_party"
 msgid "Party"
-msgstr "Gestión de Terceros"
+msgstr "Strona"
 
 msgctxt "model:ir.ui.menu,name:menu_party_configuration"
 msgid "Party Configuration"
-msgstr "Configuración de Terceros"
+msgstr "Konfiguracja ustawień strony"
 
 msgctxt "model:ir.ui.menu,name:menu_party_form"
 msgid "Parties"
-msgstr "Terceros"
+msgstr "Strony"
 
 msgctxt "model:party.address,name:"
 msgid "Address"
-msgstr "Dirección"
+msgstr "Adres"
+
+msgctxt "model:party.address.format,name:"
+msgid "Address Format"
+msgstr "Format adresu"
 
 msgctxt "model:party.category,name:"
 msgid "Category"
-msgstr "Categoría"
+msgstr "Kategoria"
 
 msgctxt "model:party.check_vies.result,name:"
 msgid "Check VIES"
-msgstr "Comprobar VIES"
+msgstr "Sprawdź VIES"
 
 msgctxt "model:party.configuration,name:"
 msgid "Party Configuration"
-msgstr "Configuración de Terceros"
+msgstr "Konfiguracja ustawień strony"
 
 msgctxt "model:party.contact_mechanism,name:"
 msgid "Contact Mechanism"
-msgstr "Medio de Contacto"
+msgstr "Sposób kontaktu"
 
 msgctxt "model:party.identifier,name:"
 msgid "Party Identifier"
-msgstr "Identificador de Tercero"
+msgstr "Identyfikator strony"
 
 msgctxt "model:party.party,name:"
 msgid "Party"
-msgstr "Tercero"
+msgstr "Strona"
 
 msgctxt "model:party.party-party.category,name:"
 msgid "Party - Category"
-msgstr "Tercero - Categoría"
+msgstr "Strona - Kategoria"
+
+msgctxt "model:party.replace.ask,name:"
+msgid "Replace Party"
+msgstr "Zastąp stronę"
 
 msgctxt "model:res.group,name:group_party_admin"
 msgid "Party Administration"
-msgstr "Administración de Terceros"
+msgstr "Administracja ustawieniami strony"
 
 msgctxt "selection:party.contact_mechanism,type:"
 msgid "E-Mail"
-msgstr "Correo electrónico"
+msgstr "E-mail"
 
 msgctxt "selection:party.contact_mechanism,type:"
 msgid "Fax"
-msgstr "Fax"
+msgstr "Faks"
 
 msgctxt "selection:party.contact_mechanism,type:"
 msgid "IRC"
@@ -538,15 +658,15 @@ msgstr "Jabber"
 
 msgctxt "selection:party.contact_mechanism,type:"
 msgid "Mobile"
-msgstr "Móvil"
+msgstr "Komórka"
 
 msgctxt "selection:party.contact_mechanism,type:"
 msgid "Other"
-msgstr "Otro"
+msgstr "Inne"
 
 msgctxt "selection:party.contact_mechanism,type:"
 msgid "Phone"
-msgstr "Teléfono"
+msgstr "Telefon"
 
 msgctxt "selection:party.contact_mechanism,type:"
 msgid "SIP"
@@ -558,56 +678,28 @@ msgstr "Skype"
 
 msgctxt "selection:party.contact_mechanism,type:"
 msgid "Website"
-msgstr "Sitio Web"
-
-msgctxt "view:party.address:"
-msgid "Addresses"
-msgstr "Direcciones"
-
-msgctxt "view:party.category:"
-msgid "Categories"
-msgstr "Categorías"
-
-msgctxt "view:party.category:"
-msgid "Category"
-msgstr "Categoría"
-
-msgctxt "view:party.check_vies.result:"
-msgid "VAT Information Exchange System Results"
-msgstr "NIT Resultados del Sistema de Intercambio de Información"
-
-msgctxt "view:party.configuration:"
-msgid "Party Configuration"
-msgstr "Configuración de Terceros"
-
-msgctxt "view:party.contact_mechanism:"
-msgid "Contact Mechanism"
-msgstr "Medio de Contacto"
-
-msgctxt "view:party.contact_mechanism:"
-msgid "Contact Mechanisms"
-msgstr "Medios de Contacto"
-
-msgctxt "view:party.identifier:"
-msgid "Party Identifier"
-msgstr "Identificador de Tercero"
-
-msgctxt "view:party.identifier:"
-msgid "Party Identifiers"
-msgstr "Identificador de Tercero"
+msgstr "Strona WWW"
 
 msgctxt "view:party.party:"
 msgid "General"
-msgstr "General"
+msgstr "Ogólne"
 
-msgctxt "view:party.party:"
-msgid "Parties"
-msgstr "Terceros"
-
-msgctxt "view:party.party:"
+msgctxt "view:party.replace.ask:"
 msgid "Party"
-msgstr "Tercero"
+msgstr "Strona"
+
+msgctxt "view:party.replace.ask:"
+msgid "Replace By"
+msgstr "Zastąp przez"
 
 msgctxt "wizard_button:party.check_vies,result,end:"
 msgid "OK"
-msgstr "Aceptar"
+msgstr "OK"
+
+msgctxt "wizard_button:party.replace,ask,end:"
+msgid "Cancel"
+msgstr "Anuluj"
+
+msgctxt "wizard_button:party.replace,ask,replace:"
+msgid "Replace"
+msgstr "Zastąp"

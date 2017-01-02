@@ -1,9 +1,18 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
 import unittest
+import doctest
+try:
+    import phonenumbers
+except ImportError:
+    phonenumbers = None
+
 import trytond.tests.test_tryton
 from trytond.tests.test_tryton import ModuleTestCase, with_transaction
+from trytond.tests.test_tryton import doctest_teardown
+from trytond.tests.test_tryton import doctest_checker
 from trytond.pool import Pool
+from trytond.transaction import Transaction
 
 
 class PartyTestCase(ModuleTestCase):
@@ -83,6 +92,15 @@ class PartyTestCase(ModuleTestCase):
                     'city': 'City',
                     }])
         self.assert_(address.id)
+        self.assertMultiLineEqual(address.full_address,
+            "St sample, 15\n"
+            "City")
+        with Transaction().set_context(address_with_party=True):
+            address = Address(address.id)
+            self.assertMultiLineEqual(address.full_address,
+                "Party 1\n"
+                "St sample, 15\n"
+                "City")
 
     @with_transaction()
     def test_party_label_report(self):
@@ -107,8 +125,46 @@ class PartyTestCase(ModuleTestCase):
         code = party2.code
         self.assertEqual(party2.rec_name, '[' + code + ']')
 
+    @unittest.skipIf(phonenumbers is None, 'requires phonenumbers')
+    @with_transaction()
+    def test_phone_number_format(self):
+        'Test phone number format'
+        pool = Pool()
+        Party = pool.get('party.party')
+        ContactMechanism = pool.get('party.contact_mechanism')
+
+        party1, = Party.create([{
+                    'name': 'Party 1',
+                    }])
+        mechanism, = ContactMechanism.create([{
+                    'party': party1.id,
+                    'type': 'phone',
+                    'value': '+442083661177',
+                    }])
+
+        # Test format on create
+        self.assertEqual(mechanism.value, '+44 20 8366 1177')
+        self.assertEqual(mechanism.value_compact, '+442083661177')
+
+        # Test format on write
+        mechanism.value = '+442083661178'
+        mechanism.save()
+        self.assertEqual(mechanism.value, '+44 20 8366 1178')
+        self.assertEqual(mechanism.value_compact, '+442083661178')
+
+        ContactMechanism.write([mechanism], {
+                'value': '+442083661179',
+                })
+        self.assertEqual(mechanism.value, '+44 20 8366 1179')
+        self.assertEqual(mechanism.value_compact, '+442083661179')
+
 
 def suite():
     suite = trytond.tests.test_tryton.suite()
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(PartyTestCase))
+    suite.addTests(doctest.DocFileSuite(
+            'scenario_party_replace.rst',
+            tearDown=doctest_teardown, encoding='utf-8',
+            checker=doctest_checker,
+            optionflags=doctest.REPORT_ONLY_FIRST_FAILURE))
     return suite
