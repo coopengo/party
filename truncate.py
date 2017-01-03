@@ -3,7 +3,7 @@ from lxml import etree
 countries = ('fr', 'be', 'it', 'mc', 'es', 'ch', 'gb', 'us')
 
 
-def troncate_records():
+def truncate_records():
     to_remove = []
     with open('address.xml', 'r') as f:
         tree = etree.parse(f)
@@ -18,4 +18,4 @@ def troncate_records():
 
 
 if __name__ == '__main__':
-    troncate_records()
+    truncate_records()
