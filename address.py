@@ -43,7 +43,8 @@ class Address(sequence_ordered(), ModelSQL, ModelView):
             ('parent', '=', None),
             ],
         states=STATES, depends=['active', 'country'])
-    active = fields.Boolean('Active')
+    active = fields.Boolean('Active',
+        help="Uncheck to exclude the address from future use.")
     full_address = fields.Function(fields.Text('Full Address'),
             'get_full_address')
 
@@ -128,27 +129,30 @@ class Address(sequence_ordered(), ModelSQL, ModelView):
 
     def _get_address_substitutions(self):
         context = Transaction().context
+        subdivision_code = ''
+        if getattr(self, 'subdivision', None):
+            subdivision_code = self.subdivision.code or ''
+            if '-' in subdivision_code:
+                subdivision_code = subdivision_code.split('-', 1)[1]
         substitutions = {
             'party_name': '',
-            'name': self.name or '',
-            'street': self.street or '',
-            'zip': self.zip or '',
-            'city': self.city or '',
-            'subdivision': self.subdivision.name if self.subdivision else '',
-            'subdivision_code': (self.subdivision.code.split('-', 1)[1]
-                if self.subdivision else ''),
-            'country': self.country.name if self.country else '',
-            'country_code': self.country.code if self.country else '',
+            'name': getattr(self, 'name', None) or '',
+            'street': getattr(self, 'street', None) or '',
+            'zip': getattr(self, 'zip', None) or '',
+            'city': getattr(self, 'city', None) or '',
+            'subdivision': (self.subdivision.name
+                if getattr(self, 'subdivision', None) else ''),
+            'subdivision_code': subdivision_code,
+            'country': (self.country.name
+                if getattr(self, 'country', None) else ''),
+            'country_code': (self.country.code or ''
+                if getattr(self, 'country', None) else ''),
             }
-
-        # Map invalid substitutions district* to subdivision* on 4.2.
-        substitutions['district'] = substitutions['subdivision']
-        substitutions['district_code'] = substitutions['subdivision_code']
-
-        if context.get('address_from_country') == self.country:
+        if context.get('address_from_country') == getattr(self, 'country', ''):
             substitutions['country'] = ''
         if context.get('address_with_party', False):
-            substitutions['party_name'] = self.party.full_name
+            substitutions['party_name'] = (self.party.full_name
+                if getattr(self, 'party', None) else '')
         for key, value in substitutions.items():
             substitutions[key.upper()] = value.upper()
         return substitutions
@@ -192,7 +196,8 @@ class AddressFormat(MatchMixin, ModelSQL, ModelView):
     __name__ = 'party.address.format'
     country = fields.Many2One('country.country', "Country")
     language = fields.Many2One('ir.lang', "Language")
-    active = fields.Boolean("Active")
+    active = fields.Boolean("Active",
+        help="Uncheck to exclude the format from future use.")
     format_ = fields.Text("Format", required=True,
         help="Available variables (also in upper case):\n"
         "- ${party_name}\n"
@@ -212,6 +217,10 @@ class AddressFormat(MatchMixin, ModelSQL, ModelView):
         super(AddressFormat, cls).__setup__()
         cls._order.insert(0, ('country', 'ASC'))
         cls._order.insert(1, ('language', 'ASC'))
+        cls._error_messages.update({
+                'invalid_format': ('Invalid format "%(format)s" '
+                    'with exception "%(exception)s".'),
+                })
 
     @classmethod
     def default_active(cls):
@@ -246,6 +255,25 @@ ${COUNTRY}"""
     def delete(cls, *args, **kwargs):
         super(AddressFormat, cls).delete(*args, **kwargs)
         cls._get_format_cache.clear()
+
+    @classmethod
+    def validate(cls, formats):
+        super(AddressFormat, cls).validate(formats)
+        for format_ in formats:
+            format_.check_format()
+
+    def check_format(self):
+        pool = Pool()
+        Address = pool.get('party.address')
+        address = Address()
+        try:
+            Template(self.format_).substitute(
+                **address._get_address_substitutions())
+        except Exception, exception:
+            self.raise_user_error('invalid_format', {
+                    'format': self.format_,
+                    'exception': exception,
+                    })
 
     @classmethod
     def get_format(cls, address, pattern=None):
