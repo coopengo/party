@@ -275,6 +275,10 @@ class PartyLang(ModelSQL, ValueMixin):
         from sql import Null, Table, Cast
         from sql.operators import Like, Concat
 
+        TableHandler = backend.get('TableHandler')
+        if not TableHandler.table_exist('ir_property'):
+            return
+
         property = Table('ir_property')
 
         cursor = Transaction().connection.cursor()

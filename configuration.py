@@ -71,6 +71,10 @@ class ConfigurationLang(_ConfigurationValue, ModelSQL, ValueMixin):
         from sql.operators import Concat
         from trytond.pool import Pool
 
+        TableHandler = backend.get('TableHandler')
+        if not TableHandler.table_exist('ir_property'):
+            return
+
         pool = Pool()
         property = Table('ir_property')
         Lang = pool.get('ir.lang')
