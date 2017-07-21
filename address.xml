@@ -108,7 +108,7 @@ ${COUNTRY}</field>
             <field name="format_">${party_name}
 ${name}
 ${street}
-${zip} ${city} ${DISTRICT_CODE}
+${zip} ${city} ${SUBDIVISION_CODE}
 ${COUNTRY}</field>
         </record>
 
@@ -128,7 +128,7 @@ ${party_name}</field>
             <field name="country" ref="country.kr"/>
             <field name="language" ref="ir.lang_kp_KR"/>
             <field name="format_">${COUNTRY}
-${district}${city}${street}
+${subdivision}${city}${street}
 ${zip}</field>
         </record>
         -->

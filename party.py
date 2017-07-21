@@ -1,20 +1,20 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
-from itertools import groupby
-
 import stdnum.eu.vat as vat
 import stdnum.exceptions
 from sql import Null, Column
 from sql.functions import CharLength
 
-from trytond.model import ModelView, ModelSQL, fields, Unique, sequence_ordered
+from trytond.model import (ModelView, ModelSQL, MultiValueMixin, ValueMixin,
+    fields, Unique, sequence_ordered)
 from trytond.wizard import Wizard, StateTransition, StateView, Button
 from trytond.pyson import Eval, Bool
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond import backend
+from trytond.tools.multivalue import migrate_property
 
-__all__ = ['Party', 'PartyCategory', 'PartyIdentifier',
+__all__ = ['Party', 'PartyLang', 'PartyCategory', 'PartyIdentifier',
     'CheckVIESResult', 'CheckVIES',
     'PartyReplace', 'PartyReplaceAsk']
 
@@ -25,39 +25,49 @@ STATES = {
 DEPENDS = ['active']
 
 
-class Party(ModelSQL, ModelView):
+class Party(ModelSQL, ModelView, MultiValueMixin):
     "Party"
     __name__ = 'party.party'
 
-    name = fields.Char('Name', select=True, states=STATES, depends=DEPENDS)
+    name = fields.Char('Name', select=True, states=STATES, depends=DEPENDS,
+        help="The main identifier of the party.")
     code = fields.Char('Code', required=True, select=True,
         states={
             'readonly': Eval('code_readonly', True),
             },
-        depends=['code_readonly'])
+        depends=['code_readonly'],
+        help="The unique identifier of the party.")
     code_readonly = fields.Function(fields.Boolean('Code Readonly'),
         'get_code_readonly')
-    lang = fields.Property(fields.Many2One("ir.lang", 'Language',
-            states=STATES, depends=DEPENDS))
+    lang = fields.MultiValue(
+        fields.Many2One('ir.lang', "Language", states=STATES, depends=DEPENDS,
+            help="Used to translate communications with the party."))
+    langs = fields.One2Many(
+        'party.party.lang', 'party', "Languages")
     identifiers = fields.One2Many('party.identifier', 'party', 'Identifiers',
-        states=STATES, depends=DEPENDS)
+        states=STATES, depends=DEPENDS,
+        help="Add other identifiers of the party.")
     tax_identifier = fields.Function(fields.Many2One(
-            'party.identifier', 'Tax Identifier'),
+            'party.identifier', 'Tax Identifier',
+            help="The identifier used for tax report."),
         'get_tax_identifier', searcher='search_tax_identifier')
     addresses = fields.One2Many('party.address', 'party',
         'Addresses', states=STATES, depends=DEPENDS)
     contact_mechanisms = fields.One2Many('party.contact_mechanism', 'party',
         'Contact Mechanisms', states=STATES, depends=DEPENDS)
     categories = fields.Many2Many('party.party-party.category',
-        'party', 'category', 'Categories', states=STATES, depends=DEPENDS)
+        'party', 'category', 'Categories', states=STATES, depends=DEPENDS,
+        help="The categories the party belongs to.")
     active = fields.Boolean('Active', select=True, states={
             'readonly': Bool(Eval('replaced_by')),
             },
-        depends=['replaced_by'])
+        depends=['replaced_by'],
+        help="Uncheck to exclude the party from future use.")
     replaced_by = fields.Many2One('party.party', "Replaced By", readonly=True,
         states={
             'invisible': ~Eval('replaced_by'),
-            })
+            },
+        help="The party replacing this one.")
     full_name = fields.Function(fields.Char('Full Name'), 'get_full_name')
     phone = fields.Function(fields.Char('Phone'), 'get_mechanism')
     mobile = fields.Function(fields.Char('Mobile'), 'get_mechanism')
@@ -78,24 +88,20 @@ class Party(ModelSQL, ModelView):
     @classmethod
     def __register__(cls, module_name):
         pool = Pool()
-        Property = pool.get('ir.property')
+        PartyLang = pool.get('party.party.lang')
         TableHandler = backend.get('TableHandler')
         cursor = Transaction().connection.cursor()
         table = cls.__table__()
+        party_lang = PartyLang.__table__()
 
         super(Party, cls).__register__(module_name)
 
         table_h = TableHandler(cls, module_name)
         if table_h.column_exist('lang'):
-            cursor.execute(*table.select(table.id, table.lang,
-                    order_by=table.lang))
-            for lang_id, group in groupby(cursor.fetchall(), lambda r: r[1]):
-                ids = [id_ for id_, _ in group]
-                if lang_id is not None:
-                    value = '%s,%s' % (cls.lang.model_name, lang_id)
-                else:
-                    value = None
-                Property.set('lang', cls.__name__, ids, value)
+            query = party_lang.insert(
+                [party_lang.party, party_lang.lang],
+                table.select(table.id, table.lang))
+            cursor.execute(*query)
             table_h.drop_column('lang')
 
         # Migration from 3.8
@@ -120,11 +126,18 @@ class Party(ModelSQL, ModelView):
             return []
         return [{}]
 
-    @staticmethod
-    def default_code_readonly():
+    @classmethod
+    def default_lang(cls, **pattern):
         Configuration = Pool().get('party.configuration')
         config = Configuration(1)
-        return bool(config.party_sequence)
+        lang = config.get_multivalue('party_lang', **pattern)
+        return lang.id if lang else None
+
+    @classmethod
+    def default_code_readonly(cls, **pattern):
+        Configuration = Pool().get('party.configuration')
+        config = Configuration(1)
+        return bool(config.get_multivalue('party_sequence', **pattern))
 
     def get_code_readonly(self, name):
         return True
@@ -171,15 +184,21 @@ class Party(ModelSQL, ModelView):
         return ''
 
     @classmethod
-    def create(cls, vlist):
-        Sequence = Pool().get('ir.sequence')
-        Configuration = Pool().get('party.configuration')
+    def _new_code(cls, **pattern):
+        pool = Pool()
+        Sequence = pool.get('ir.sequence')
+        Configuration = pool.get('party.configuration')
+        config = Configuration(1)
+        sequence = config.get_multivalue('party_sequence', **pattern)
+        if sequence:
+            return Sequence.get_id(sequence.id)
 
+    @classmethod
+    def create(cls, vlist):
         vlist = [x.copy() for x in vlist]
         for values in vlist:
             if not values.get('code'):
-                config = Configuration(1)
-                values['code'] = Sequence.get_id(config.party_sequence.id)
+                values['code'] = cls._new_code()
             values.setdefault('addresses', None)
         return super(Party, cls).create(vlist)
 
@@ -234,6 +253,76 @@ class Party(ModelSQL, ModelView):
         return default_address
 
 
+class PartyLang(ModelSQL, ValueMixin):
+    "Party Lang"
+    __name__ = 'party.party.lang'
+    party = fields.Many2One(
+        'party.party', "Party", ondelete='CASCADE', select=True)
+    lang = fields.Many2One('ir.lang', "Language")
+
+    @classmethod
+    def __register__(cls, module_name):
+        TableHandler = backend.get('TableHandler')
+        exist = TableHandler.table_exist(cls._table)
+
+        super(PartyLang, cls).__register__(module_name)
+
+        if not exist:
+            cls._migrate_property([], [], [])
+
+    @classmethod
+    def clean_properties_from_4_2(cls):
+        from sql import Null, Table, Cast
+        from sql.operators import Like, Concat
+
+        TableHandler = backend.get('TableHandler')
+        if not TableHandler.table_exist('ir_property'):
+            return
+
+        property = Table('ir_property')
+
+        cursor = Transaction().connection.cursor()
+        cursor.execute(*property.select(property.res,
+                where=property.res != Null))
+
+        res_model_names = list(set([x[0].split(',')[0]
+                for x in cursor.fetchall()]))
+
+        to_delete = {}
+
+        for res_model_name in res_model_names:
+            table_name = res_model_name.replace('.', '_')
+            res_model = Table(table_name)
+            query_table = property.join(res_model, 'LEFT OUTER', condition=(
+                    property.res == Concat(table_name + ',',
+                        Cast(res_model.id, 'VARCHAR'))
+                    ))
+            cursor.execute(*query_table.select(property.id,
+                    where=Like(property.res, table_name + ',%') &
+                    (res_model.id == Null)))
+            property_ids = [x[0] for x in cursor.fetchall()]
+            to_delete[res_model_name] = property_ids
+        if to_delete:
+            cursor.execute(
+                *property.delete(where=property.id.in_(
+                        sum([p for p in to_delete.values()], []))))
+            for res_model_name, property_ids in to_delete.items():
+                if property_ids:
+                    print '[%s] - %s Inconsistent record(s) removed' % (
+                        res_model_name, len(property_ids))
+        else:
+            print 'Nothing to do - Exisiting property records are clean'
+
+    @classmethod
+    def _migrate_property(cls, field_names, value_names, fields):
+        field_names.append('lang')
+        value_names.append('lang')
+        cls.clean_properties_from_4_2()
+        migrate_property(
+            'party.party', field_names, cls, value_names,
+            parent='party', fields=fields)
+
+
 class PartyCategory(ModelSQL):
     'Party - Category'
     __name__ = 'party.party-party.category'
@@ -249,8 +338,12 @@ class PartyIdentifier(sequence_ordered(), ModelSQL, ModelView):
     __name__ = 'party.identifier'
     _rec_name = 'code'
     party = fields.Many2One('party.party', 'Party', ondelete='CASCADE',
-        required=True, select=True)
-    type = fields.Selection('get_types', 'Type')
+        required=True, select=True,
+        help="The party identified by this record.")
+    type = fields.Selection([
+            (None, ''),
+            ('eu_vat', 'VAT'),
+            ], 'Type')
     type_string = type.translated('type')
     code = fields.Char('Code', required=True)
 
@@ -292,13 +385,6 @@ class PartyIdentifier(sequence_ordered(), ModelSQL, ModelView):
             cls.save(identifiers)
             party_h.drop_column('vat_number')
             party_h.drop_column('vat_country')
-
-    @classmethod
-    def get_types(cls):
-        return [
-            (None, ''),
-            ('eu_vat', 'VAT'),
-            ]
 
     @fields.depends('type', 'code')
     def on_change_with_code(self):
@@ -496,12 +582,14 @@ class PartyReplace(Wizard):
 class PartyReplaceAsk(ModelView):
     "Replace Party"
     __name__ = 'party.replace.ask'
-    source = fields.Many2One('party.party', "Source", required=True)
+    source = fields.Many2One('party.party', "Source", required=True,
+        help="The party to be replaced.")
     destination = fields.Many2One('party.party', "Destination", required=True,
         domain=[
             ('id', '!=', Eval('source', -1)),
             ],
-        depends=['source'])
+        depends=['source'],
+        help="The party that replaces.")
 
     @classmethod
     def default_source(cls):
