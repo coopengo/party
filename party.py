@@ -294,14 +294,15 @@ class PartyLang(ModelSQL, ValueMixin):
             table_name = res_model_name.replace('.', '_')
             res_model = Table(table_name)
             query_table = property.join(res_model, 'LEFT OUTER', condition=(
-                    property.res == Concat(table_name + ',',
+                    property.res == Concat(res_model_name + ',',
                         Cast(res_model.id, 'VARCHAR'))
                     ))
             cursor.execute(*query_table.select(property.id,
-                    where=Like(property.res, table_name + ',%') &
+                    where=Like(property.res, res_model_name + ',%') &
                     (res_model.id == Null)))
             property_ids = [x[0] for x in cursor.fetchall()]
-            to_delete[res_model_name] = property_ids
+            if property_ids:
+                to_delete[res_model_name] = property_ids
         if to_delete:
             cursor.execute(
                 *property.delete(where=property.id.in_(
