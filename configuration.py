@@ -91,7 +91,7 @@ class ConfigurationLang(_ConfigurationValue, ModelSQL, ValueMixin):
             *query_table.select(lang.id, where=property.res == Null))
         result = cursor.fetchone()
         if result:
-            result = list(cursor.fetchone())
+            result = list(result)
             default_lang = Lang(result[0])
             print 'Default Language restored [%s]' % default_lang.rec_name
             pool.get('party.configuration.party_lang'
