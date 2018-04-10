@@ -676,9 +676,10 @@ class PartyErase(Wizard):
                         sql_columns.append(column)
                         sql_values.append(
                             value(column) if callable(value) else value)
-                    cursor.execute(*table.update(
-                            sql_columns, sql_values,
-                            where=table.id.in_(query)))
+                    if len(sql_columns) != 0:
+                        cursor.execute(*table.update(
+                                sql_columns, sql_values,
+                                where=table.id.in_(query)))
                 if not resource:
                     continue
                 for Resource in resources:
