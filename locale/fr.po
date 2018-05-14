@@ -933,6 +933,14 @@ msgctxt "wizard_button:party.check_vies,result,end:"
 msgid "OK"
 msgstr "OK"
 
+msgctxt "wizard_button:party.erase,ask,end:"
+msgid "Cancel"
+msgstr "Annuler"
+
+msgctxt "wizard_button:party.erase,ask,erase:"
+msgid "Erase"
+msgstr "Effacer"
+
 msgctxt "wizard_button:party.replace,ask,end:"
 msgid "Cancel"
 msgstr "Annuler"
