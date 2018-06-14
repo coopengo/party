@@ -37,7 +37,7 @@ msgstr "Vous ne pouvez pas modifier le tiers sur le moyen de contact « %s ».
 msgctxt "error:party.erase:"
 msgid "The party \"%(party)s\" can not be erased because he is still active."
 msgstr ""
-"Le tiers \"%(party)s\" ne peut pas être effacé parce qu'il est encore actif."
+"Le tiers « %(party)s » ne peut pas être effacé car il est toujours actif."
 
 msgctxt "error:party.identifier:"
 msgid "Invalid VAT number \"%(code)s\" on party \"%(party)s\"."
@@ -328,6 +328,10 @@ msgctxt "field:party.contact_mechanism,id:"
 msgid "ID"
 msgstr "ID"
 
+msgctxt "field:party.contact_mechanism,name:"
+msgid "Name"
+msgstr "Nom"
+
 msgctxt "field:party.contact_mechanism,other_value:"
 msgid "Value"
 msgstr "Valeur"
@@ -382,7 +386,7 @@ msgstr "Mis à jour par"
 
 msgctxt "field:party.erase.ask,id:"
 msgid "ID"
-msgstr "Identifiant"
+msgstr "ID"
 
 msgctxt "field:party.erase.ask,party:"
 msgid "Party"
@@ -601,12 +605,12 @@ msgid "Source"
 msgstr "Source"
 
 msgctxt "help:party.address,active:"
-msgid "Uncheck to exclude the address from future use."
-msgstr "Décocher pour exclure l'adresse d'une utilisation future."
+msgid "Uncheck to exclude from future use."
+msgstr "Décocher pour exclure d'une utilisation future."
 
 msgctxt "help:party.address.format,active:"
-msgid "Uncheck to exclude the format from future use."
-msgstr "Décocher pour exclure le format d'une utilisation future."
+msgid "Uncheck to exclude from future use."
+msgstr "Décocher pour exclure d'une utilisation future."
 
 msgctxt "help:party.address.format,format_:"
 msgid ""
@@ -633,8 +637,8 @@ msgstr ""
 "- ${country_code}"
 
 msgctxt "help:party.category,active:"
-msgid "Uncheck to exclude the category from future use."
-msgstr "Décocher pour exclure la catégorie d'une utilisation future."
+msgid "Uncheck to exclude from future use."
+msgstr "Décocher pour exclure d'une utilisation future."
 
 msgctxt "help:party.category,childs:"
 msgid "Add children below the category."
@@ -665,9 +669,12 @@ msgid "Used to generate the party code."
 msgstr "Utilisée pour générer le code du tiers."
 
 msgctxt "help:party.contact_mechanism,active:"
-msgid "Uncheck to exclude the contact mechanism from future use."
-msgstr ""
-"Décocher pour exclure le mécanisme de contact d'une utilisation future."
+msgid "Uncheck to exclude from future use."
+msgstr "Décocher pour exclure d'une utilisation future."
+
+msgctxt "help:party.erase.ask,party:"
+msgid "The party to be erased."
+msgstr "Le tiers à effacer."
 
 msgctxt "help:party.erase.ask,party:"
 msgid "The party to be erased."
@@ -678,8 +685,8 @@ msgid "The party identified by this record."
 msgstr "Le tiers identifié par cet enregistrement."
 
 msgctxt "help:party.party,active:"
-msgid "Uncheck to exclude the party from future use."
-msgstr "Décocher pour exclure le tiers d'une utilisation future."
+msgid "Uncheck to exclude from future use."
+msgstr "Décocher pour exclure d'une utilisation future."
 
 msgctxt "help:party.party,categories:"
 msgid "The categories the party belongs to."
@@ -755,7 +762,11 @@ msgstr "Étiquettes"
 
 msgctxt "model:ir.action,name:wizard_check_vies"
 msgid "Check VIES"
-msgstr "Validation VIES"
+msgstr "Valider avec VIES"
+
+msgctxt "model:ir.action,name:wizard_erase"
+msgid "Erase"
+msgstr "Effacer"
 
 msgctxt "model:ir.action,name:wizard_erase"
 msgid "Erase"
@@ -843,7 +854,7 @@ msgstr "Moyen de contact"
 
 msgctxt "model:party.erase.ask,name:"
 msgid "Erase Party"
-msgstr "Effacer un tiers"
+msgstr "Effacer le tiers"
 
 msgctxt "model:party.identifier,name:"
 msgid "Party Identifier"
@@ -948,6 +959,27 @@ msgstr "Annuler"
 msgctxt "wizard_button:party.replace,ask,replace:"
 msgid "Replace"
 msgstr "Remplacer"
+
+msgctxt "help:party.address,active:"
+msgid "Uncheck to exclude the address from future use."
+msgstr "Décocher pour exclure l'adresse d'une utilisation future."
+
+msgctxt "help:party.address.format,active:"
+msgid "Uncheck to exclude the format from future use."
+msgstr "Décocher pour exclure le format d'une utilisation future."
+
+msgctxt "help:party.category,active:"
+msgid "Uncheck to exclude the category from future use."
+msgstr "Décocher pour exclure la catégorie d'une utilisation future."
+
+msgctxt "help:party.contact_mechanism,active:"
+msgid "Uncheck to exclude the contact mechanism from future use."
+msgstr ""
+"Décocher pour exclure le mécanisme de contact d'une utilisation future."
+
+msgctxt "help:party.party,active:"
+msgid "Uncheck to exclude the party from future use."
+msgstr "Décocher pour exclure le tiers d'une utilisation future."
 
 msgctxt "view:party.address:"
 msgid "Addresses"

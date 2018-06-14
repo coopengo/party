@@ -56,7 +56,6 @@ requires.append(get_require_version('trytond'))
 tests_require = [get_require_version('proteus'), 'phonenumbers']
 dependency_links = []
 if minor_version % 2:
-    # Add development index for testing with proteus
     dependency_links.append('https://trydevpi.tryton.org/')
 
 setup(name=name,
@@ -97,6 +96,7 @@ setup(name=name,
         'Natural Language :: German',
         'Natural Language :: Hungarian',
         'Natural Language :: Italian',
+        'Natural Language :: Persian',
         'Natural Language :: Polish',
         'Natural Language :: Portuguese (Brazilian)',
         'Natural Language :: Russian',
@@ -130,5 +130,6 @@ setup(name=name,
     use_2to3=True,
     convert_2to3_doctests=[
         'tests/scenario_party_replace.rst',
+        'tests/scenario_party_erase.rst',
         ],
     )

@@ -1,6 +1,11 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
-from trytond.model import ModelView, ModelSQL, fields, Unique
+from sql.conditionals import Coalesce
+from sql.operators import Equal
+
+from trytond import backend
+from trytond.model import (
+    ModelView, ModelSQL, DeactivableMixin, fields, Exclude)
 from trytond.pyson import Eval
 
 __all__ = ['Category']
@@ -13,7 +18,7 @@ DEPENDS = ['active']
 SEPARATOR = ' / '
 
 
-class Category(ModelSQL, ModelView):
+class Category(DeactivableMixin, ModelSQL, ModelView):
     "Category"
     __name__ = 'party.category'
     name = fields.Char('Name', required=True, states=STATES, translate=True,
@@ -25,15 +30,14 @@ class Category(ModelSQL, ModelView):
     childs = fields.One2Many('party.category', 'parent',
        'Children', states=STATES, depends=DEPENDS,
         help="Add children below the category.")
-    active = fields.Boolean('Active',
-        help="Uncheck to exclude the category from future use.")
 
     @classmethod
     def __setup__(cls):
         super(Category, cls).__setup__()
         t = cls.__table__()
         cls._sql_constraints = [
-            ('name_parent_uniq', Unique(t, t.name, t.parent),
+            ('name_parent_exclude',
+                Exclude(t, (t.name, Equal), (Coalesce(t.parent, -1), Equal)),
                 'The name of a party category must be unique by parent.'),
             ]
         cls._error_messages.update({
@@ -42,9 +46,15 @@ class Category(ModelSQL, ModelView):
                 })
         cls._order.insert(0, ('name', 'ASC'))
 
-    @staticmethod
-    def default_active():
-        return True
+    @classmethod
+    def __register__(cls, module_name):
+        TableHandler = backend.get('TableHandler')
+        table_h = TableHandler(cls, module_name)
+
+        super(Category, cls).__register__(module_name)
+
+        # Migration from 4.6: replace unique by exclude
+        table_h.drop_constraint('name_parent_uniq')
 
     @classmethod
     def validate(cls, categories):

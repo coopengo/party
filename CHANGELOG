@@ -1,4 +1,13 @@
+Version 4.8.1 - 2018-05-21
+* Bug fixes (see mercurial logs for details)
+
+Version 4.8.0 - 2018-04-23
+* Bug fixes (see mercurial logs for details)
 * Add Erase Party wizard
+* Search party also by contact mechanisms
+* Add contact_mechanism_get
+* Add name to contact mechanism
+* Improve distinction of address record name
 
 Version 4.6.0 - 2017-10-30
 * Bug fixes (see mercurial logs for details)

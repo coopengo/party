@@ -6,7 +6,7 @@ from sql import Null, Column, Cast, Literal
 from sql.functions import CharLength, Substring, Position
 
 from trytond.model import (ModelView, ModelSQL, MultiValueMixin, ValueMixin,
-    fields, Unique, sequence_ordered)
+    DeactivableMixin, fields, Unique, sequence_ordered)
 from trytond.wizard import Wizard, StateTransition, StateView, Button
 from trytond.pyson import Eval, Bool
 from trytond.transaction import Transaction
@@ -26,7 +26,7 @@ STATES = {
 DEPENDS = ['active']
 
 
-class Party(ModelSQL, ModelView, MultiValueMixin):
+class Party(DeactivableMixin, ModelSQL, ModelView, MultiValueMixin):
     "Party"
     __name__ = 'party.party'
 
@@ -59,11 +59,6 @@ class Party(ModelSQL, ModelView, MultiValueMixin):
     categories = fields.Many2Many('party.party-party.category',
         'party', 'category', 'Categories', states=STATES, depends=DEPENDS,
         help="The categories the party belongs to.")
-    active = fields.Boolean('Active', select=True, states={
-            'readonly': Bool(Eval('replaced_by')),
-            },
-        depends=['replaced_by'],
-        help="Uncheck to exclude the party from future use.")
     replaced_by = fields.Many2One('party.party', "Replaced By", readonly=True,
         states={
             'invisible': ~Eval('replaced_by'),
@@ -85,6 +80,10 @@ class Party(ModelSQL, ModelView, MultiValueMixin):
              'The code of the party must be unique.')
         ]
         cls._order.insert(0, ('name', 'ASC'))
+        cls.active.states.update({
+                'readonly': Bool(Eval('replaced_by')),
+                })
+        cls.active.depends.append('replaced_by')
 
     @classmethod
     def __register__(cls, module_name):
@@ -101,10 +100,6 @@ class Party(ModelSQL, ModelView, MultiValueMixin):
     def order_code(tables):
         table, _ = tables[None]
         return [CharLength(table.code), table.code]
-
-    @staticmethod
-    def default_active():
-        return True
 
     @staticmethod
     def default_categories():
@@ -221,6 +216,7 @@ class Party(ModelSQL, ModelView, MultiValueMixin):
             ('code',) + tuple(clause[1:]),
             ('identifiers.code',) + tuple(clause[1:]),
             ('name',) + tuple(clause[1:]),
+            ('contact_mechanisms.rec_name',) + tuple(clause[1:]),
             ]
 
     def address_get(self, type=None):
@@ -228,19 +224,35 @@ class Party(ModelSQL, ModelView, MultiValueMixin):
         Try to find an address for the given type, if no type matches
         the first address is returned.
         """
-        Address = Pool().get("party.address")
-        addresses = Address.search(
-            [("party", "=", self.id), ("active", "=", True)],
-            order=[('sequence', 'ASC'), ('id', 'ASC')])
-        if not addresses:
-            return None
-        default_address = addresses[0]
-        if not type:
-            return default_address
-        for address in addresses:
-            if getattr(address, type):
-                return address
+        default_address = None
+        if self.addresses:
+            default_address = self.addresses[0]
+            if type:
+                for address in self.addresses:
+                    if getattr(address, type):
+                        return address
         return default_address
+
+    def contact_mechanism_get(self, types=None, usage=None):
+        """
+        Try to find a contact mechanism for the given types and usage, if no
+        usage matches the first mechanism of the given types is returned.
+        """
+        default_mechanism = None
+        if types:
+            if isinstance(types, basestring):
+                types = {types}
+            mechanisms = [m for m in self.contact_mechanisms
+                if m.type in types]
+        else:
+            mechanisms = self.contact_mechanisms
+        if mechanisms:
+            default_mechanism = mechanisms[0]
+            if usage:
+                for mechanism in mechanisms:
+                    if getattr(mechanism, usage):
+                        return mechanism
+        return default_mechanism
 
 
 class PartyLang(ModelSQL, ValueMixin):
@@ -718,8 +730,8 @@ class PartyErase(Wizard):
                 ['name', 'street', 'zip', 'city', 'country', 'subdivision'],
                 [None, None, None, None, None, None]),
             (ContactMechanism, [('party', '=', party_id)], True,
-                ['value', 'comment'],
-                [None, None]),
+                ['value', 'name', 'comment'],
+                [None, None, None]),
             ]
 
     @classmethod
