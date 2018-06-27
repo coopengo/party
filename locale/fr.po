@@ -676,10 +676,6 @@ msgctxt "help:party.erase.ask,party:"
 msgid "The party to be erased."
 msgstr "Le tiers à effacer."
 
-msgctxt "help:party.erase.ask,party:"
-msgid "The party to be erased."
-msgstr "Le tiers à effacer."
-
 msgctxt "help:party.identifier,party:"
 msgid "The party identified by this record."
 msgstr "Le tiers identifié par cet enregistrement."
@@ -763,10 +759,6 @@ msgstr "Étiquettes"
 msgctxt "model:ir.action,name:wizard_check_vies"
 msgid "Check VIES"
 msgstr "Valider avec VIES"
-
-msgctxt "model:ir.action,name:wizard_erase"
-msgid "Erase"
-msgstr "Effacer"
 
 msgctxt "model:ir.action,name:wizard_erase"
 msgid "Erase"
