@@ -120,7 +120,7 @@ class Address(DeactivableMixin, sequence_ordered(), ModelSQL, ModelView):
         full_address = Template(AddressFormat.get_format(self)).substitute(
             **self._get_address_substitutions())
         return '\n'.join(
-            filter(None, (x.strip() for x in full_address.splitlines())))
+            [_f for _f in (x.strip() for x in full_address.splitlines()) if _f])
 
     def _get_address_substitutions(self):
         context = Transaction().context
@@ -148,7 +148,7 @@ class Address(DeactivableMixin, sequence_ordered(), ModelSQL, ModelView):
         if context.get('address_with_party', False):
             substitutions['party_name'] = (self.party.full_name
                 if getattr(self, 'party', None) else '')
-        for key, value in substitutions.items():
+        for key, value in list(substitutions.items()):
             substitutions[key.upper()] = value.upper()
         return substitutions
 
@@ -163,13 +163,13 @@ class Address(DeactivableMixin, sequence_ordered(), ModelSQL, ModelView):
         else:
             country = None
         return ', '.join(
-            filter(None, [
+            [_f for _f in [
                     party,
                     self.name,
                     street,
                     self.zip,
                     self.city,
-                    country]))
+                    country] if _f])
 
     @classmethod
     def search_rec_name(cls, name, clause):
@@ -276,7 +276,7 @@ ${COUNTRY}"""
         try:
             Template(self.format_).substitute(
                 **address._get_address_substitutions())
-        except Exception, exception:
+        except Exception as exception:
             self.raise_user_error('invalid_format', {
                     'format': self.format_,
                     'exception': exception,
@@ -303,7 +303,7 @@ ${COUNTRY}"""
             language = None
         pattern.setdefault('language', language.id if language else None)
 
-        key = tuple(sorted(pattern.iteritems()))
+        key = tuple(sorted(pattern.items()))
         format_ = cls._get_format_cache.get(key)
         if format_ is not None:
             return format_

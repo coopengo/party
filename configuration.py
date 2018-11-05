@@ -93,11 +93,11 @@ class ConfigurationLang(_ConfigurationValue, ModelSQL, ValueMixin):
         if result:
             result = list(result)
             default_lang = Lang(result[0])
-            print 'Default Language restored [%s]' % default_lang.rec_name
+            print('Default Language restored [%s]' % default_lang.rec_name)
             pool.get('party.configuration.party_lang'
                 ).create([{'party_lang': default_lang}])
         else:
-            print 'No default language on party configuration found'
+            print('No default language on party configuration found')
 
     @classmethod
     def _migrate_property(cls, field_names, value_names, fields):

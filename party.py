@@ -13,6 +13,7 @@ from trytond.transaction import Transaction
 from trytond.pool import Pool
 from trytond import backend
 from trytond.tools.multivalue import migrate_property
+import collections
 
 __all__ = ['Party', 'PartyLang', 'PartyCategory', 'PartyIdentifier',
     'CheckVIESResult', 'CheckVIES',
@@ -240,7 +241,7 @@ class Party(DeactivableMixin, ModelSQL, ModelView, MultiValueMixin):
         """
         default_mechanism = None
         if types:
-            if isinstance(types, basestring):
+            if isinstance(types, str):
                 types = {types}
             mechanisms = [m for m in self.contact_mechanisms
                 if m.type in types]
@@ -321,13 +322,13 @@ class PartyLang(ModelSQL, ValueMixin):
         if to_delete:
             cursor.execute(
                 *property.delete(where=property.id.in_(
-                        sum([p for p in to_delete.values()], []))))
-            for res_model_name, property_ids in to_delete.items():
+                        sum([p for p in list(to_delete.values())], []))))
+            for res_model_name, property_ids in list(to_delete.items()):
                 if property_ids:
-                    print '[%s] - %s Inconsistent record(s) removed' % (
-                        res_model_name, len(property_ids))
+                    print('[%s] - %s Inconsistent record(s) removed' % (
+                        res_model_name, len(property_ids)))
         else:
-            print 'Nothing to do - Exisiting property records are clean'
+            print('Nothing to do - Exisiting property records are clean')
 
     @classmethod
     def _migrate_property(cls, field_names, value_names, fields):
@@ -476,7 +477,7 @@ class CheckVIES(Wizard):
                         parties_failed.append(party.id)
                     else:
                         parties_succeed.append(party.id)
-                except Exception, e:
+                except Exception as e:
                     if hasattr(e, 'faultstring') \
                             and hasattr(e.faultstring, 'find'):
                         if e.faultstring.find('INVALID_INPUT'):
@@ -649,7 +650,7 @@ class PartyErase(Wizard):
                 table = table.join(right, condition=condition)
             else:
                 table = right
-            for k, sub_tables in tables.iteritems():
+            for k, sub_tables in tables.items():
                 if k is None:
                     continue
                 table = convert_from(table, sub_tables)
@@ -660,7 +661,7 @@ class PartyErase(Wizard):
         with Transaction().set_context(active_test=False):
             while replacing:
                 replacing = Party.search([
-                        ('replaced_by', 'in', map(int, replacing)),
+                        ('replaced_by', 'in', list(map(int, replacing))),
                         ])
                 parties += replacing
         for party in parties:
@@ -688,7 +689,7 @@ class PartyErase(Wizard):
                             column = Column(table, column)
                             sql_columns.append(column)
                             sql_values.append(
-                                value(column) if callable(value) else value)
+                                value(column) if isinstance(value, collections.Callable) else value)
                         cursor.execute(*table.update(
                                 sql_columns, sql_values,
                                 where=table.id.in_(query)))
