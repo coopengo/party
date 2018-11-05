@@ -2,7 +2,7 @@
 # this repository contains the full copyright notices and license terms.
 import stdnum.eu.vat as vat
 import stdnum.exceptions
-from sql import Null, Column, Cast, Literal
+from sql import Null, Column, Literal
 from sql.functions import CharLength, Substring, Position
 
 from trytond.model import (ModelView, ModelSQL, MultiValueMixin, ValueMixin,
@@ -88,11 +88,9 @@ class Party(DeactivableMixin, ModelSQL, ModelView, MultiValueMixin):
 
     @classmethod
     def __register__(cls, module_name):
-        TableHandler = backend.get('TableHandler')
-
         super(Party, cls).__register__(module_name)
 
-        table_h = TableHandler(cls, module_name)
+        table_h = cls.__table_handler__(module_name)
 
         # Migration from 3.8
         table_h.not_null_action('name', 'remove')
@@ -192,8 +190,9 @@ class Party(DeactivableMixin, ModelSQL, ModelView, MultiValueMixin):
     def copy(cls, parties, default=None):
         if default is None:
             default = {}
-        default = default.copy()
-        default['code'] = None
+        else:
+            default = default.copy()
+        default.setdefault('code', None)
         return super(Party, cls).copy(parties, default=default)
 
     @classmethod
@@ -276,7 +275,7 @@ class PartyLang(ModelSQL, ValueMixin):
         super(PartyLang, cls).__register__(module_name)
 
         if not exist:
-            party_h = TableHandler(Party, module_name)
+            party_h = Party.__table_handler__(module_name)
             if party_h.column_exist('lang'):
                 query = table.insert(
                     [table.party, table.lang],
@@ -376,13 +375,12 @@ class PartyIdentifier(sequence_ordered(), ModelSQL, ModelView):
     def __register__(cls, module_name):
         pool = Pool()
         Party = pool.get('party.party')
-        TableHandler = backend.get('TableHandler')
         cursor = Transaction().connection.cursor()
         party = Party.__table__()
 
         super(PartyIdentifier, cls).__register__(module_name)
 
-        party_h = TableHandler(Party, module_name)
+        party_h = Party.__table_handler__(module_name)
         if (party_h.column_exist('vat_number')
                 and party_h.column_exist('vat_country')):
             identifiers = []
@@ -506,7 +504,7 @@ class PartyReplace(Wizard):
     start_state = 'ask'
     ask = StateView('party.replace.ask', 'party.replace_ask_view_form', [
             Button("Cancel", 'end', 'tryton-cancel'),
-            Button("Replace", 'replace', 'tryton-find-replace', default=True),
+            Button("Replace", 'replace', 'tryton-launch', default=True),
             ])
     replace = StateTransition()
 
@@ -702,10 +700,10 @@ class PartyErase(Wizard):
                             cursor.execute(*table.delete(
                                     where=table.resource.like(
                                         Model.__name__ + ',%')
-                                    & Cast(Substring(table.resource,
+                                    & Model.id.sql_cast(
+                                        Substring(table.resource,
                                             Position(',', table.resource) +
-                                            Literal(1)),
-                                        Model.id.sql_type().base).in_(query)))
+                                            Literal(1))).in_(query)))
         return 'end'
 
     def check_erase(self, party):

@@ -11,7 +11,6 @@ from trytond.model import (
     ModelView, ModelSQL, MatchMixin, DeactivableMixin, fields,
     sequence_ordered)
 from trytond.pyson import Eval, If
-from trytond import backend
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.cache import Cache
@@ -32,6 +31,9 @@ class Address(DeactivableMixin, sequence_ordered(), ModelSQL, ModelView):
             'readonly': If(~Eval('active'), True, Eval('id', 0) > 0),
             },
         depends=['active', 'id'])
+    party_name = fields.Char(
+        "Party Name", states=STATES, depends=DEPENDS,
+        help="If filled, replace the name of the party for address formatting")
     name = fields.Char("Building Name", states=STATES, depends=DEPENDS)
     street = fields.Text("Street", states=STATES, depends=DEPENDS)
     zip = fields.Char('Zip', states=STATES, depends=DEPENDS)
@@ -57,15 +59,12 @@ class Address(DeactivableMixin, sequence_ordered(), ModelSQL, ModelView):
 
     @classmethod
     def __register__(cls, module_name):
-        TableHandler = backend.get('TableHandler')
         cursor = Transaction().connection.cursor()
-        table = TableHandler(cls, module_name)
         sql_table = cls.__table__()
 
         super(Address, cls).__register__(module_name)
 
-        # Migration from 2.4: drop required on sequence
-        table.not_null_action('sequence', action='remove')
+        table = cls.__table_handler__(module_name)
 
         # Migration from 4.0: remove streetbis
         if table.column_exist('streetbis'):
@@ -131,6 +130,7 @@ class Address(DeactivableMixin, sequence_ordered(), ModelSQL, ModelView):
                 subdivision_code = subdivision_code.split('-', 1)[1]
         substitutions = {
             'party_name': '',
+            'attn': '',
             'name': getattr(self, 'name', None) or '',
             'street': getattr(self, 'street', None) or '',
             'zip': getattr(self, 'zip', None) or '',
@@ -146,14 +146,25 @@ class Address(DeactivableMixin, sequence_ordered(), ModelSQL, ModelView):
         if context.get('address_from_country') == getattr(self, 'country', ''):
             substitutions['country'] = ''
         if context.get('address_with_party', False):
-            substitutions['party_name'] = (self.party.full_name
-                if getattr(self, 'party', None) else '')
+            substitutions['party_name'] = self.party_full_name
+        if context.get('address_attention_party', False):
+            substitutions['attn'] = (
+                context['address_attention_party'].full_name)
         for key, value in list(substitutions.items()):
             substitutions[key.upper()] = value.upper()
         return substitutions
 
+    @property
+    def party_full_name(self):
+        name = ''
+        if self.party_name:
+            name = self.party_name
+        elif self.party:
+            name = self.party.full_name
+        return name
+
     def get_rec_name(self, name):
-        party = self.party.full_name
+        party = self.party_full_name
         if self.street:
             street = self.street.splitlines()[0]
         else:
@@ -213,6 +224,7 @@ class AddressFormat(DeactivableMixin, MatchMixin, ModelSQL, ModelView):
         help="Available variables (also in upper case):\n"
         "- ${party_name}\n"
         "- ${name}\n"
+        "- ${attn}\n"
         "- ${street}\n"
         "- ${zip}\n"
         "- ${city}\n"

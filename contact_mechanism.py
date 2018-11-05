@@ -9,7 +9,6 @@ except ImportError:
 from trytond.model import (
     ModelView, ModelSQL, DeactivableMixin, fields, sequence_ordered)
 from trytond.pyson import Eval
-from trytond import backend
 
 __all__ = ['ContactMechanism']
 
@@ -101,16 +100,6 @@ class ContactMechanism(
                 'invalid_phonenumber': ('The phone number "%(phone)s" of '
                     'party "%(party)s" is not valid .'),
                 })
-
-    @classmethod
-    def __register__(cls, module_name):
-        TableHandler = backend.get('TableHandler')
-        table = TableHandler(cls, module_name)
-
-        super(ContactMechanism, cls).__register__(module_name)
-
-        # Migration from 2.4: drop required on sequence
-        table.not_null_action('sequence', action='remove')
 
     @staticmethod
     def default_type():
