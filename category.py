@@ -53,7 +53,7 @@ class Category(DeactivableMixin, tree(separator=' / '), ModelSQL, ModelView):
     @classmethod
     def validate(cls, categories):
         super(Category, cls).validate(categories)
-        cls.check_recursion(categories, rec_name='name')
+        cls.check_recursion(categories)
         for category in categories:
             category.check_name()
 
