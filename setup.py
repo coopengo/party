@@ -44,6 +44,12 @@ if minor_version % 2:
     download_url = (
         'hg+http://hg.tryton.org/modules/%s#egg=%s-%s' % (
             name[8:], name, version))
+local_version = []
+for build in ['CI_BUILD_NUMBER', 'CI_JOB_NUMBER', 'CI_JOB_ID']:
+    if os.environ.get(build):
+        local_version.append(os.environ[build])
+if local_version:
+    version += '+' + '.'.join(local_version)
 
 requires = ['python-sql >= 0.4', 'python-stdnum >= 1.8']
 for dep in info.get('depends', []):
@@ -73,8 +79,8 @@ setup(name=name,
     keywords='tryton party',
     package_dir={'trytond.modules.party': '.'},
     packages=(
-        ['trytond.modules.party'] +
-        ['trytond.modules.party.%s' % p for p in find_packages()]
+        ['trytond.modules.party']
+        + ['trytond.modules.party.%s' % p for p in find_packages()]
         ),
     package_data={
         'trytond.modules.party': (info.get('xml', [])
@@ -89,7 +95,8 @@ setup(name=name,
         'Intended Audience :: Financial and Insurance Industry',
         'Intended Audience :: Legal Industry',
         'Intended Audience :: Manufacturing',
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'License :: OSI Approved :: '
+        'GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: Bulgarian',
         'Natural Language :: Catalan',
         'Natural Language :: Chinese (Simplified)',
@@ -100,6 +107,7 @@ setup(name=name,
         'Natural Language :: French',
         'Natural Language :: German',
         'Natural Language :: Hungarian',
+        'Natural Language :: Indonesian',
         'Natural Language :: Italian',
         'Natural Language :: Persian',
         'Natural Language :: Polish',
@@ -113,6 +121,7 @@ setup(name=name,
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Office/Business',
@@ -122,7 +131,6 @@ setup(name=name,
     install_requires=requires,
     extras_require={
         'VIES': ['python-stdnum[SOAP]'],
-        'VIES-ALT': ['python-stdnum[SOAP-ALT]'],
         'phonenumbers': ['phonenumbers'],
         },
     dependency_links=dependency_links,

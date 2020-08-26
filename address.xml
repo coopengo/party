@@ -82,11 +82,56 @@ this repository contains the full copyright notices and license terms. -->
             <field name="perm_delete" eval="True"/>
         </record>
 
+        <record model="ir.ui.view" id="address_subdivision_type_view_list">
+            <field name="model">party.address.subdivision_type</field>
+            <field name="type">tree</field>
+            <field name="name">address_subdivision_type_list</field>
+        </record>
+
+        <record model="ir.ui.view" id="address_subdivision_type_view_form">
+            <field name="model">party.address.subdivision_type</field>
+            <field name="type">form</field>
+            <field name="name">address_subdivision_type_form</field>
+        </record>
+
+        <record model="ir.action.act_window" id="act_address_subdivision_type_form">
+            <field name="name">Address Subdivision Types</field>
+            <field name="res_model">party.address.subdivision_type</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_address_subdivision_type_form_view1">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="address_subdivision_type_view_list"/>
+            <field name="act_window" ref="act_address_subdivision_type_form"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_address_subdivision_type_form_view2">
+          <field name="sequence" eval="20"/>
+          <field name="view" ref="address_subdivision_type_view_form"/>
+          <field name="act_window" ref="act_address_subdivision_type_form"/>
+        </record>
+        <menuitem parent="menu_configuration" sequence="20"
+            action="act_address_subdivision_type_form" id="menu_address_subdivision_type_form"/>
+
+        <record model="ir.model.access" id="access_address_subdivision_type">
+            <field name="model" search="[('model', '=', 'party.address.subdivision_type')]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_address_subdivision_type_admin">
+            <field name="model" search="[('model', '=', 'party.address.subdivision_type')]"/>
+            <field name="group" ref="group_party_admin"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
     </data>
-    <data noupdate="1" grouped="1" skiptest="1">
+    <data noupdate="1" grouped="1">
         <!-- From https://en.wikipedia.org/wiki/Address_(geography) -->
         <record model="party.address.format" id="address_format_be">
-            <field name="country" ref="country.be"/>
+            <field name="country_code">BE</field>
             <field name="format_">${attn}
 ${party_name}
 ${name}
@@ -97,7 +142,7 @@ ${COUNTRY}</field>
 
 
         <record model="party.address.format" id="address_format_fr">
-            <field name="country" ref="country.fr"/>
+            <field name="country_code">FR</field>
             <field name="format_">${party_name}
 ${attn}
 ${name}
@@ -107,7 +152,7 @@ ${COUNTRY}</field>
         </record>
 
         <record model="party.address.format" id="address_format_it">
-            <field name="country" ref="country.it"/>
+            <field name="country_code">IT</field>
             <field name="format_">${party_name}
 ${attn}
 ${name}
@@ -116,29 +161,13 @@ ${zip} ${city} ${SUBDIVISION_CODE}
 ${COUNTRY}</field>
         </record>
 
-        <!-- for Japan language
-        <record model="party.address.format" id="address_format_jp_jp_JP">
-            <field name="country" ref="country.jp"/>
-            <field name="language" ref="ir.lang_jp_JP"/>
-             <field name="format_">${COUNTRY}〒${zip}
-${subdivision}${city}${street}
-${name}
-${party_name}</field>
+        <record model="party.address.subdivision_type" id="address_subdivision_it">
+            <field name="country_code">IT</field>
+            <field name="types" eval="['province']"/>
         </record>
-        -->
-
-        <!-- for Korean language
-        <record model="party.address.format" id="address_format_kr_kp_KR">
-            <field name="country" ref="country.kr"/>
-            <field name="language" ref="ir.lang_kp_KR"/>
-            <field name="format_">${COUNTRY}
-${subdivision}${city}${street}
-${zip}</field>
-        </record>
-        -->
 
         <record model="party.address.format" id="address_format_es">
-            <field name="country" ref="country.es"/>
+            <field name="country_code">ES</field>
             <field name="format_">${party_name}
 ${street}
 ${zip} ${city}
@@ -146,8 +175,13 @@ ${subdivision}
 ${COUNTRY}</field>
         </record>
 
+        <record model="party.address.subdivision_type" id="address_subdivision_es">
+            <field name="country_code">ES</field>
+            <field name="types" eval="['province']"/>
+        </record>
+
         <record model="party.address.format" id="address_format_ch">
-            <field name="country" ref="country.ch"/>
+            <field name="country_code">CH</field>
             <field name="format_">${party_name}
 ${street}
 ${zip} ${city}
@@ -156,7 +190,7 @@ ${COUNTRY}</field>
 
 
         <record model="party.address.format" id="address_format_gb">
-            <field name="country" ref="country.gb"/>
+            <field name="country_code">GB</field>
             <field name="format_">${party_name}
 ${street}
 ${CITY}
@@ -165,7 +199,7 @@ ${COUNTRY}</field>
         </record>
 
         <record model="party.address.format" id="address_format_us">
-            <field name="country" ref="country.us"/>
+            <field name="country_code">US</field>
             <field name="format_">${attn}
 ${party_name}
 ${street}
@@ -173,5 +207,5 @@ ${city}, ${subdivision_code} ${zip}
 ${COUNTRY}</field>
         </record>
 
-        </data>
+    </data>
 </tryton>

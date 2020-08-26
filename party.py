@@ -18,22 +18,13 @@ from trytond.tools import lstrip_wildcard
 from .exceptions import (
     InvalidIdentifierCode, VIESUnavailable, SimilarityWarning, EraseError)
 
-__all__ = ['Party', 'PartyLang', 'PartyCategory', 'PartyIdentifier',
-    'CheckVIESResult', 'CheckVIES',
-    'PartyReplace', 'PartyReplaceAsk',
-    'PartyErase', 'PartyEraseAsk']
-
-STATES = {
-    'readonly': ~Eval('active', True),
-}
-DEPENDS = ['active']
-
 
 class Party(DeactivableMixin, ModelSQL, ModelView, MultiValueMixin):
     "Party"
     __name__ = 'party.party'
 
-    name = fields.Char('Name', select=True, states=STATES, depends=DEPENDS,
+    name = fields.Char(
+        "Name", select=True,
         help="The main identifier of the party.")
     code = fields.Char('Code', required=True, select=True,
         states={
@@ -44,23 +35,22 @@ class Party(DeactivableMixin, ModelSQL, ModelView, MultiValueMixin):
     code_readonly = fields.Function(fields.Boolean('Code Readonly'),
         'get_code_readonly')
     lang = fields.MultiValue(
-        fields.Many2One('ir.lang', "Language", states=STATES, depends=DEPENDS,
+        fields.Many2One('ir.lang', "Language",
             help="Used to translate communications with the party."))
     langs = fields.One2Many(
         'party.party.lang', 'party', "Languages")
-    identifiers = fields.One2Many('party.identifier', 'party', 'Identifiers',
-        states=STATES, depends=DEPENDS,
+    identifiers = fields.One2Many(
+        'party.identifier', 'party', "Identifiers",
         help="Add other identifiers of the party.")
     tax_identifier = fields.Function(fields.Many2One(
             'party.identifier', 'Tax Identifier',
             help="The identifier used for tax report."),
         'get_tax_identifier', searcher='search_tax_identifier')
-    addresses = fields.One2Many('party.address', 'party',
-        'Addresses', states=STATES, depends=DEPENDS)
-    contact_mechanisms = fields.One2Many('party.contact_mechanism', 'party',
-        'Contact Mechanisms', states=STATES, depends=DEPENDS)
-    categories = fields.Many2Many('party.party-party.category',
-        'party', 'category', 'Categories', states=STATES, depends=DEPENDS,
+    addresses = fields.One2Many('party.address', 'party', "Addresses")
+    contact_mechanisms = fields.One2Many(
+        'party.contact_mechanism', 'party', "Contact Mechanisms")
+    categories = fields.Many2Many(
+        'party.party-party.category', 'party', 'category', "Categories",
         help="The categories the party belongs to.")
     replaced_by = fields.Many2One('party.party', "Replaced By", readonly=True,
         states={
@@ -278,9 +268,8 @@ class PartyLang(ModelSQL, ValueMixin):
     def __register__(cls, module_name):
         pool = Pool()
         Party = pool.get('party.party')
-        TableHandler = backend.get('TableHandler')
         cursor = Transaction().connection.cursor()
-        exist = TableHandler.table_exist(cls._table)
+        exist = backend.TableHandler.table_exist(cls._table)
         table = cls.__table__()
         party = Party.__table__()
 
@@ -302,8 +291,7 @@ class PartyLang(ModelSQL, ValueMixin):
         from sql import Null, Table, Cast
         from sql.operators import Like, Concat
 
-        TableHandler = backend.get('TableHandler')
-        if not TableHandler.table_exist('ir_property'):
+        if not backend.TableHandler.table_exist('ir_property'):
             return
 
         property = Table('ir_property')
@@ -361,7 +349,7 @@ class PartyCategory(ModelSQL):
         ondelete='CASCADE', required=True, select=True)
 
 
-class PartyIdentifier(sequence_ordered(), ModelSQL, ModelView):
+class Identifier(sequence_ordered(), ModelSQL, ModelView):
     'Party Identifier'
     __name__ = 'party.identifier'
     _rec_name = 'code'
@@ -487,7 +475,7 @@ class PartyIdentifier(sequence_ordered(), ModelSQL, ModelView):
         cursor = Transaction().connection.cursor()
         party = Party.__table__()
 
-        super(PartyIdentifier, cls).__register__(module_name)
+        super().__register__(module_name)
 
         party_h = Party.__table_handler__(module_name)
         if (party_h.column_exist('vat_number')
@@ -525,7 +513,7 @@ class PartyIdentifier(sequence_ordered(), ModelSQL, ModelView):
         return self.code
 
     def pre_validate(self):
-        super(PartyIdentifier, self).pre_validate()
+        super().pre_validate()
         self.check_code()
 
     @fields.depends('type', 'party', 'code')
@@ -609,7 +597,7 @@ class CheckVIES(Wizard):
             }
 
 
-class PartyReplace(Wizard):
+class Replace(Wizard):
     "Replace Party"
     __name__ = 'party.replace'
     start_state = 'ask'
@@ -700,7 +688,7 @@ class PartyReplace(Wizard):
             ]
 
 
-class PartyReplaceAsk(ModelView):
+class ReplaceAsk(ModelView):
     "Replace Party"
     __name__ = 'party.replace.ask'
     source = fields.Many2One('party.party', "Source", required=True,
@@ -724,7 +712,7 @@ class PartyReplaceAsk(ModelView):
             self.destination = self.source.replaced_by
 
 
-class PartyErase(Wizard):
+class Erase(Wizard):
     "Erase Party"
     __name__ = 'party.erase'
     start_state = 'ask'
@@ -799,8 +787,8 @@ class PartyErase(Wizard):
                                         Model.__name__ + ',%')
                                     & Model.id.sql_cast(
                                         Substring(table.resource,
-                                            Position(',', table.resource) +
-                                            Literal(1))).in_(query)))
+                                            Position(',', table.resource)
+                                            + Literal(1))).in_(query)))
         return 'end'
 
     def check_erase(self, party):
@@ -837,7 +825,7 @@ class PartyErase(Wizard):
         return [Attachment, Note]
 
 
-class PartyEraseAsk(ModelView):
+class EraseAsk(ModelView):
     "Erase Party"
     __name__ = 'party.erase.ask'
     party = fields.Many2One('party.party', "Party", required=True,

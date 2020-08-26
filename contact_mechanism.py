@@ -12,14 +12,9 @@ from trytond.model import (
     ModelView, ModelSQL, DeactivableMixin, fields, sequence_ordered)
 from trytond.model.exceptions import AccessError
 from trytond.pyson import Eval
+from trytond.transaction import Transaction
+
 from .exceptions import InvalidPhoneNumber
-
-__all__ = ['ContactMechanism']
-
-STATES = {
-    'readonly': ~Eval('active'),
-    }
-DEPENDS = ['active']
 
 _TYPES = [
     ('phone', 'Phone'),
@@ -47,45 +42,41 @@ class ContactMechanism(
     __name__ = 'party.contact_mechanism'
     _rec_name = 'value'
 
-    type = fields.Selection(_TYPES, 'Type', required=True, states=STATES,
-        sort=False, depends=DEPENDS)
-    value = fields.Char('Value', select=True, states=STATES, depends=DEPENDS
+    type = fields.Selection(_TYPES, "Type", required=True, sort=False)
+    value = fields.Char("Value", select=True,
         # Add all function fields to ensure to always fill them via on_change
-        + ['email', 'website', 'skype', 'sip', 'other_value', 'value_compact'])
+        depends=[
+            'email', 'website', 'skype', 'sip', 'other_value',
+            'value_compact'])
     value_compact = fields.Char('Value Compact', readonly=True)
-    name = fields.Char("Name", states=STATES, depends=DEPENDS)
-    comment = fields.Text('Comment', states=STATES, depends=DEPENDS)
-    party = fields.Many2One('party.party', 'Party', required=True,
-        ondelete='CASCADE', states=STATES, select=True, depends=DEPENDS)
+    name = fields.Char("Name")
+    comment = fields.Text("Comment")
+    party = fields.Many2One(
+        'party.party', "Party", required=True, ondelete='CASCADE', select=True)
     email = fields.Function(fields.Char('E-Mail', states={
         'invisible': Eval('type') != 'email',
         'required': Eval('type') == 'email',
-        'readonly': ~Eval('active', True),
-        }, depends=['value', 'type', 'active']),
+        }, depends=['value', 'type']),
         'get_value', setter='set_value')
     website = fields.Function(fields.Char('Website', states={
         'invisible': Eval('type') != 'website',
         'required': Eval('type') == 'website',
-        'readonly': ~Eval('active', True),
-        }, depends=['value', 'type', 'active']),
+        }, depends=['value', 'type']),
         'get_value', setter='set_value')
     skype = fields.Function(fields.Char('Skype', states={
         'invisible': Eval('type') != 'skype',
         'required': Eval('type') == 'skype',
-        'readonly': ~Eval('active', True),
-        }, depends=['value', 'type', 'active']),
+        }, depends=['value', 'type']),
         'get_value', setter='set_value')
     sip = fields.Function(fields.Char('SIP', states={
         'invisible': Eval('type') != 'sip',
         'required': Eval('type') == 'sip',
-        'readonly': ~Eval('active', True),
-        }, depends=['value', 'type', 'active']),
+        }, depends=['value', 'type']),
         'get_value', setter='set_value')
     other_value = fields.Function(fields.Char('Value', states={
         'invisible': Eval('type').in_(['email', 'website', 'skype', 'sip']),
         'required': ~Eval('type').in_(['email', 'website']),
-        'readonly': ~Eval('active', True),
-        }, depends=['value', 'type', 'active']),
+        }, depends=['value', 'type']),
         'get_value', setter='set_value')
     url = fields.Function(fields.Char('URL', states={
                 'invisible': ~Eval('url'),
@@ -100,6 +91,10 @@ class ContactMechanism(
     @staticmethod
     def default_type():
         return 'phone'
+
+    @classmethod
+    def default_party(cls):
+        return Transaction().context.get('related_party')
 
     @classmethod
     def get_value(cls, mechanisms, names):
@@ -118,13 +113,13 @@ class ContactMechanism(
             return 'callto:%s' % value
         elif self.type == 'sip':
             return 'sip:%s' % value
-        elif self.type == 'phone':
+        elif self.type in {'phone', 'mobile'}:
             return 'tel:%s' % value
         elif self.type == 'fax':
             return 'fax:%s' % value
         return None
 
-    @fields.depends('party', '_parent_party.addreses')
+    @fields.depends('party', '_parent_party.addresses')
     def _phone_country_codes(self):
         if self.party:
             for address in self.party.addresses:
@@ -200,6 +195,10 @@ class ContactMechanism(
     @fields.depends('other_value', 'type', methods=['_change_value'])
     def on_change_other_value(self):
         return self._change_value(self.other_value, self.type)
+
+    def get_rec_name(self, name):
+        name = self.name or self.party.rec_name
+        return '%s <%s>' % (name, self.value_compact or self.value)
 
     @classmethod
     def search_rec_name(cls, name, clause):
