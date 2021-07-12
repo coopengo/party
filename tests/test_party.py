@@ -15,8 +15,34 @@ from trytond.pool import Pool
 from trytond.exceptions import UserError
 from trytond.transaction import Transaction
 
+from ..party import IDENTIFIER_TYPES
 
-class PartyTestCase(ModuleTestCase):
+
+class PartyCheckEraseMixin:
+
+    @with_transaction()
+    def test_check_erase_party(self):
+        "Test check erase of party"
+        pool = Pool()
+        Erase = pool.get('party.erase', type='wizard')
+        Session = pool.get('ir.session.wizard')
+        party = self.setup_check_erase_party()
+
+        session = Session()
+        session.save()
+
+        Erase(session.id).check_erase(party)
+
+    def setup_check_erase_party(self):
+        pool = Pool()
+        Party = pool.get('party.party')
+
+        party = Party(active=False)
+        party.save()
+        return party
+
+
+class PartyTestCase(PartyCheckEraseMixin, ModuleTestCase):
     'Test Party module'
     module = 'party'
 
@@ -189,14 +215,14 @@ class PartyTestCase(ModuleTestCase):
         address1, address2 = Address.create([{
                     'party': party.id,
                     'sequence': 1,
-                    'zip': None,
+                    'postal_code': None,
                     }, {
                     'party': party.id,
                     'sequence': 2,
-                    'zip': '1000',
+                    'postal_code': '1000',
                     }])
 
-        address = party.address_get(type='zip')
+        address = party.address_get(type='postal_code')
 
         self.assertEqual(address, address2)
 
@@ -413,6 +439,36 @@ class PartyTestCase(ModuleTestCase):
         contact = party.contact_mechanism_get(usage='name')
 
         self.assertEqual(contact, contact2)
+
+    @with_transaction()
+    def test_tax_identifier_types(self):
+        "Ensure tax identifier types are in identifier types"
+        pool = Pool()
+        Party = pool.get('party.party')
+        self.assertFalse(
+            set(Party.tax_identifier_types())
+            - set(dict(IDENTIFIER_TYPES).keys()))
+
+    @with_transaction()
+    def test_party_distance(self):
+        "Test party distance"
+        pool = Pool()
+        Party = pool.get('party.party')
+
+        A, B, = Party.create([{
+                    'name': 'A',
+                    }, {
+                    'name': 'B',
+                    }])
+
+        parties = Party.search([])
+        self.assertEqual([p.distance for p in parties], [None] * 2)
+
+        with Transaction().set_context(related_party=A.id):
+            parties = Party.search([])
+            self.assertEqual(
+                [(p.name, p.distance) for p in parties],
+                [('A', 0), ('B', None)])
 
 
 def suite():
