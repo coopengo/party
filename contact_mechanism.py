@@ -131,7 +131,10 @@ class ContactMechanism(
         for country_code in chain(self._phone_country_codes(), [None]):
             try:
                 # Country code is ignored if value has an international prefix
-                return phonenumbers.parse(value, country_code)
+                parsed = phonenumbers.parse(value, country_code)
+                if not phonenumbers.is_valid_number(parsed):
+                    continue
+                return parsed
             except NumberParseException:
                 pass
         return None
