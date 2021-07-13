@@ -132,6 +132,9 @@ class ContactMechanism(
             try:
                 # Country code is ignored if value has an international prefix
                 parsed = phonenumbers.parse(value, country_code)
+
+                # JCA: Ignore numbers that "can" parse, but are actually
+                # invalid
                 if not phonenumbers.is_valid_number(parsed):
                     continue
                 return parsed
