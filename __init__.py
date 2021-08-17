@@ -7,6 +7,7 @@ from . import party
 from . import address
 from . import contact_mechanism
 from . import configuration
+from . import ir
 
 
 def register():
@@ -23,9 +24,12 @@ def register():
         address.AddressFormat,
         address.SubdivisionType,
         contact_mechanism.ContactMechanism,
+        contact_mechanism.ContactMechanismLanguage,
         configuration.Configuration,
         configuration.ConfigurationSequence,
         configuration.ConfigurationLang,
+        ir.Email,
+        ir.EmailTemplate,
         module='party', type_='model')
     Pool.register(
         party.CheckVIES,

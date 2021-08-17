@@ -1,3 +1,20 @@
+Version 6.0.1 - 2021-06-17
+* Bug fixes (see mercurial logs for details)
+
+Version 6.0.0 - 2021-05-03
+* Bug fixes (see mercurial logs for details)
+* Add language to contact mechanism
+* Add contact_mechanism as email recipient
+* Rename zip into postal code
+* Add simple distance between parties
+* Configure available identifiers
+* Add ar, at, by, cn, cr, gr, id, il, kr, lt, no, ro and se identifiers
+
+Version 5.8.0 - 2020-11-02
+* Bug fixes (see mercurial logs for details)
+* Remove support for Python 3.5
+* Add ad, gt, jp, md, nz, pe, py, uy, ve and za tax identifiers
+
 Version 5.6.0 - 2020-05-04
 * Bug fixes (see mercurial logs for details)
 * Display name on contact mechanism record name
